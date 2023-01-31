@@ -1,0 +1,1770 @@
+Introduction
+
+    Most of today’s APIs have a big problem: once deployed, they can’t change. There are
+    big-name APIs that stay static for years at a time, as the industry changes around them,
+    because changing them would be too difficult.
+
+    A very simple system is always easy to change. At small scales, a RESTful system has a
+    larger up-front design cost than a push-button solution. But as your API matures and
+    starts to change, you’ll really need some way—like REST—of adapting to change.
+
+    But my main
+    goal is to teach you the underlying principles of REST. Learn those, and you’ll be able
+    to exploit whichever experiments pan out and whichever standards are approved.
+
+    There are two specific problems I’m trying to solve with this book: duplication of effort
+    and avoidance of hypermedia. Let’s take a look at them.
+
+    Duplication of Effort
+
+        Of course, Twitter, Facebook, and Google are big companies that compete with each
+        other. They don’t want to make it easy for you to learn their competitors’ APIs. But small
+!!!!    companies and nonprofits do the same thing. They design their APIs as though nobody
+        else had ever had a similar idea. This interferes with their goal of getting people to
+        actually use their APIs.
+
+        Let me show you just one example. The website ProgrammableWeb has a directory of
+        over 8,000 APIs. As I write this, it knows about 57 microblogging APIs—APIs whose
+        main purpose is posting a little bit of text to a user account.
+        It’s great that there are 57
+        companies publishing APIs in this field, but do we really need 57 different designs? We’re
+        not talking about something complicated here, like insurance policies or regulatory
+        compliance. We’re talking about posting a little bit of text to a user account. Do you
+        want to be the one who designs the 58th microblogging API?
+
+        There’s something about APIs that makes everyone want to design their own from scratch, even when that
+        makes no sense from a business perspective.
+
+    Hypermedia Is Hard
+        But there’s one aspect of REST that most developers still don’t understand: hypermedia.
+        We all understand hypermedia in the context of the Web. It’s just a fancy word for links.
+        Web pages link to each other, and the result is the World Wide Web, driven by hyper‐
+        media. But it seems we’ve got a mental block when it comes to hypermedia in web APIs.
+        This is a big problem, because hypermedia is the feature that makes a web API capable
+        of handling changes gracefully.
+
+        I did it this way because hypermedia is the single most important aspect of REST, and
+        the least understood.
+
+
+    Understanding Standards
+        The World Wide Web isn’t an objective thing that’s out there to be studied scientifically.
+        It’s a social construct—a set of agreements to do things a certain way. Fortunately, unlike
+        other social constructs (like etiquette), the agreements underlying the Web are generally
+        agreed upon. The core agreements underlying the human web are RFC 2616 (the HTTP
+        standard), the W3C’s specification for HTML 4, and ECMA-262 (the standard that
+        underlies JavaScript, also known as ECMAScript). Each standard does a different job,
+        and over the course of this book, I’ll discuss dozens of other standards designed specif‐
+        ically for use in APIs
+
+!!!!    When navigating the forest of standards, it’s useful to keep in mind that not all standards
+        have equal force. Some are extremely well established, used by everyone, and if you go
+        against them you’re causing a lot of trouble for yoursef. Other standards are just one
+        person’s opinion, and that opinion might be no better than yours.
+        I find it helpful to divide standards into four categories: fiat standards, personal stand‐
+        ards, corporate standards, and open standards. I’ll be using these terms throughout the
+        book, so let me explain each one in a bit more depth before we move on.
+
+    Fiat Standards
+        Fiat standards aren’t really standards; they’re behaviors. No one agreed to them. They’re
+        just a description of the way somebody does things. The behavior may be documented,
+        but the core assumption of a standard—that other people ought to do things the same
+        way—is missing.
+        Pretty much every API today is a fiat standard, a one-off design associated with a specific
+        company. That’s why we talk about the “Twitter API,” the “Facebook API,” and the
+        “Google+ API.”
+
+        unless you work for the company in question, there’s no expectation that you should use this design for your
+        API. If you reuse a fiat standard, we don’t say your API conforms to a standard; we say it’s a clone.
+
+        The main problem I’m trying to solve in this book is that hundreds of person-years of
+        design work is locked up in fiat standards where it can’t be reused. This needs to stop.
+!!!!    Designing a new API today means reinventing a long series of wheels. Once your API
+        is finished, your client developers have to reinvent corresponding wheels on the client side.
+!!!!    Even under ideal circumstances, your API will be a fiat standard, since your business
+        requirements will be slightly different from everyone else’s. But ideally a fiat standard
+        would be just a light gloss over a number of other standards.
+
+    Personal Standards
+        Personal standards are standards—you’re invited to read the documents and implement
+        the standards yourself—but they’re just one person’s opinion. The Maze+XML standard
+        I describe in Chapter 5 is a good example. There’s no expectation that Maze+XML is
+        the standard way to implement a maze game API, but if it works for you, you might as
+        well use it. Someone else has done the design work for you
+
+        Many open standards start off as personal standards—as side projects that are formal‐
+        ized after a lot of experimentation. Siren, which I cover in Chapter 7, is a good example.
+
+    Corporate Standards
+        Corporate standards are created by a consortium of companies trying to solve a problem
+        that plagues them all, or by a single company trying to solve a recurring problem on
+        behalf of its customers. Corporate standards tend to be better defined and to use more
+        formal language than personal standards, but they have no more force than personal
+        standards. They’re just one company’s (or a group of companies') opinion
+
+        Many industry standards start off as corporate
+        standards. OData (also discussed in Chapter 10) started as a Microsoft project, but it
+        was submitted to OASIS in 2012 and will eventually become an OASIS standard.
+
+    Open Standards
+        An open standard has gone through a process of design by committee, or at least had
+        an open comment period during which a lot of people read the specification, complained
+        about it, and made suggestions for improvement. At the end of this process, the speci‐
+        fication was blessed by some kind of recognized standards body
+
+        This process gives an open standard a certain amount of moral force. If there’s an open
+        standard that does more or less what you want, you really should use it instead of making
+        up your own fiat standard. The design process and the comment period probably turned
+        up a lot of issues that you won’t encounter until it’s too late.
+
+
+    Requests for Comments (RFCs) and Internet-Drafts
+
+        An RFC begins life as an Internet-Draft. This is a document that looks like a standards
+        document, but you’re not supposed to build implementations based on it. You’re sup‐
+        posed to find problems with the specification and give feedback.
+        An Internet-Draft has a built-in lifetime of six months. Six months after it is published,
+        a draft must be approved as an RFC or replaced with an updated draft. If neither of
+        those things happens, then the draft expires and should not be used for anything. On
+        the other hand, if the draft is approved, it expires immediately and is replaced by an RFC.
+
+        For example, I’ll refer to the HTTP/ 1.1 specification as RFC 2616.
+
+===============================================================================================================
+===============================================================================================================
+Chapter  1 - Surfing the web
+
+    As far as this book is concerned, the Web is based on three technologies: the URL naming
+    convention, the HTTP protocol, and the HTML document format. URL and HTTP are
+    simple, but to apply them to distributed programming you must understand them in
+    more detail than the average web developer does. The first few chapters of this book are
+    dedicated to giving you this understanding.
+
+    Resources and Representations
+        Resources = The URL http://www.youtypeitwepostit.com/ identifies a resource—probably the home
+        page of the website advertised on the billboard
+
+        Representations = When a web browser sends an HTTP request for a resource, the server sends a document
+        in response (usually an HTML document, but sometimes a binary image or something
+        else). Whatever document the server sends, we call that document a representation of the resource.
+
+!!!!    So each URL identifies a resource. When a client makes an HTTP request to a URL, it
+        gets a representation of the underlying resource. The client never sees a resource directly
+
+    Addressability
+        The principle of addressability just says that every resource should have its own URL.
+        If something is important to your application, it should have a unique name, a URL, so
+        that you and your users can refer to it unambiguously (a counter example would be a Flash website where
+        everything is at the same address...)
+
+    Short sessions
+!!!     HTTP sessions last for one request. The client sends a request, and the server responds.
+        This means Alice could turn her phone off overnight, and when her browser restored
+        the page from its internal cache, she could click on one of the two links on this page and
+        it would still work. (Compare this to an SSH session, which is terminated if you turn your computer off.)
+
+        Alice could leave this web page open in her phone for six months, and when she finally
+        clicks on a link, the web server would respond as if she’d only waited a few seconds. The
+        web server isn’t sitting up late at night worrying about Alice. When she’s not making an
+        HTTP request, the server doesn’t know Alice exists.
+
+!!!!!   This principle is sometimes called statelessness. I think this is a confusing term because
+        the client and the server in this system both keep state; they just keep different kinds of
+        state. The term “statelessness” is getting at the fact that the server doesn’t care what state
+        the client is in.
+
+    The HTTP standard (RFC 2616) defines eight methods a client can apply to a resource.
+    In this book, I’ll focus on five of them: GET, HEAD, POST, PUT, and DELETE. In
+    Chapter 3, I’ll cover these methods in detail, along with an extension method, PATCH,
+    designed specifically for use in web APIs. Right now the important thing to keep in mind
+    is that there are a small number of standard methods.
+
+
+    Application state
+        Every state in this diagram corresponds to a particular page (or to no page at all) being
+        open in Alice’s browser window. In REST terms, we call this bit of information—which
+        page are you on?—the application state.
+
+    Resource State
+        When the story begins, there are two messages in the message list: “Hello” and “Later.”
+        Sending a GET to the home page doesn’t change resource state, since the home page is
+        a static document that never changes. Sending a GET to the message list won’t change the state either.
+        But when Alice sends a POST to the message list, it puts the server in a new state. Now
+        the message list contains three messages: “Hello,” “Later,” and “Test.”
+
+    Because HTTP sessions are so short, the server doesn’t know anything about a client’s
+    application state. The client has no direct control over resource state—all that stuff is
+    kept on the server. And yet, the Web works. It works through REST—representational
+    state transfer.
+
+    Application state is kept on the client, but the server can manipulate it by sending rep‐
+    resentations—HTML documents, in this case—that describe the possible state transi‐
+    tions. Resource state is kept on the server, but the client can manipulate it by sending
+    the server a representation—an HTML form submission, in this case—describing the
+    desired new state
+
+    Connectedness
+        The strands of the web are the HTML <a> tags and <form>
+        tags, each describing a GET or POST HTTP request Alice might decide to make. I call
+!!      this the principle of connectedness: each web page tells you how to get to the adjoining pages.
+
+!!!!!   The Web as a whole works on the principle of connectedness (see above), which is better known as
+        “hypermedia as the engine of application state,” sometimes abbreviated HATEOAS. I
+        prefer “connectedness” or “the hypermedia constraint,” because “hypermedia as the en‐
+        gine of application state” sounds intimidating. But at this point, you should have no
+        reason to find it intimidating. You know what application state is—it’s which web page
+        a client is on. Hypermedia is the general term for things like HTML links and forms:
+        the techniques a server uses to explain to a client what it can do next.
+        To say that hypermedia is the engine of application state is to say that we all navigate
+        the Web by filling out forms and following links.
+
+!!! Web APIs Lag Behind the Web
+        1. Web APIs frequently have human-readable documentation that explains how to
+           construct URLs for all the different resources. This is like writing English prose
+           explaining how to find a particular file on an FTP server. If websites did this, no
+           one would bother to use the Web.
+           Instead of telling you what URLs to type in, websites embed URLs in <a> tags and
+           <form> tags—hypermedia controls that you can activate by clicking a link or a button.
+           In REST terms, putting information about URL construction in separate human readable documents violates the
+           principles of connectedness and self-descriptive messages.
+
+        2. Lots of websites have help docs, but when was the last time you used them? Unless
+           there’s a serious problem (you bought something and it was never delivered), it’s
+           easier to click around and figure out how the site works by exploring the connected,
+           self-descriptive HTML documents it sends you.
+           Today’s APIs present their resources in a big menu of options instead of an inter‐
+           connected web. This makes it difficult to see what one resource has to do with another.
+
+       3. Integrating with a new API inevitably requires writing custom software, or instal‐
+          ling a one-off library written by someone else. But you don’t need to write custom
+          software to use a new website. You see a URL on a billboard and plug it into your
+          web browser—the same client you use for every other website in the world.
+
+       4. When APIs change, custom API clients break and have to be fixed. But when a
+          website undergoes a redesign, the site’s users grumble about the redesign and then
+          they adapt. Their browsers don’t stop working.
+          In REST terms, the website redesign is entirely encapsulated in the self-descriptive
+          HTML documents served by the website. A client that could understand the old
+          HTML documents can understand the new ones
+
+===============================================================================================================
+===============================================================================================================
+Chapter  2 - A simple API
+
+!!! The ideal API would have the same characteristics that make the World Wide Web easy
+    to use. As a developer, you would be able to figure out how to use it, starting with nothing
+    but a URL you saw on a billboard.
+
+    HTTP GET: Your Safe Bet
+
+        The HTTP standard says that a GET request is a request for a representation. It’s not
+        intended to change any resource state on the server. This means that if you have a URL
+        to a resource and don’t know anything more, you can always make a GET request and
+        get a representation in return. Your GET request won’t do something disastrous like
+        delete all the data. We say that GET is a safe method
+
+        (It’s OK for the server to change incidental things because of a GET request, like incre‐
+         menting a hit counter or logging the request to a file, but that’s not the purpose of the
+         GET request. Nobody makes an HTTP request just to increment the hit counter)
+
+!!! How to Read an HTTP Response
+        Well, every HTTP response can be split into three parts:
+
+        1. The status code, sometimes called the response code
+           This is a three-digit number that summarizes how the request went. The response
+           code is the first thing an API client sees, and it sets the tone for the rest of the
+           response. Here, the status code was 200 (OK). This is the status code a client hopes
+           for—it means that everything went fine.
+        2. The entity-body, sometimes called just the body
+           This is a document written in some data format, which the client is expected to
+           understand. If you think of a GET request as a request for a representation, you can
+           think of the entity-body as the representation (technically, the entire HTTP response is the
+           ‘representation’, but the important information is usually in the entitybody).
+        3. The response headers
+           These are a series of key-value pairs describing the entity-body and the HTTP re‐
+           sponse in general. Response headers are sent between the status code and the entitybody
+
+!!!!        The most important HTTP header is Content-Type, which tells the HTTP client
+            how to understand the entity-body. It’s so important that its value has a special
+            name. We say the value of the Content-Type header is the entity-body’s media
+            type. (It’s also called the MIME type or the content type. Sometimes “media type” is
+            hyphenated: media-type.)
+            (example : the most common media types are text/html (for HTML) and image types like image/jpeg)
+
+    JSON
+        If you’re a web developer, you probably recognize this entity-body as a JSON document.
+        In case you don’t, here’s a very quick introduction to JSON.
+        JSON, described in RFC 4627, is a standard for representing simple data structures in
+        plain text. It uses double quotes to describe strings:
+            "this is a string"
+        It uses square brackets to describe lists:
+            [1, 2, 3]
+        It uses curly brackets to describe objects (collections of key-value pairs):
+            {"key": "value"}
+
+        So what is this application/vnd.collection+json stuff? Clearly this format is based
+        on JSON, since it looks like JSON and its media type has “json” in the name. But what is it, really?
+
+        In Chapter 6, I’ll talk about Collection+JSON in detail, but here’s the short version.
+        Collection+JSON is a standard for publishing a searchable list of resources over the Web.
+        JSON puts constraints on plain text, and Collection+JSON puts constraints on JSON.
+        A server can’t serve just any JSON document as application/vnd.collection+json.
+        It can only serve a JSON object:
+            {}
+        But not just any object. The object has to have a property called collection, which
+        maps to another object:
+            {"collection": {}}
+        The “collection” object ought to have a property called items that maps to a list:
+            {"collection": {"items": []}}
+        The items in the “items” list need to be objects:
+            {"collection": {"items": [{}, {}, {}]}}
+        And on and on, constraint after constraint...
+
+!!!!    Collection+JSON is a way of serving lists—not lists of data structures, which you can
+        do with normal JSON, but lists that describe HTTP resources
+
+!!!     A document that doesn’t follow these rules isn’t a Collection+JSON document: it’s just
+        some JSON. By allowing yourself to be bound by Collection+JSON’s constraints, you
+        gain the ability to talk about concepts like resources and URLs. These concepts are not
+        defined in JSON, which can only talk about simple things like strings and lists.
+
+    HTTP POST: How Resources Are Born
+
+        here’s the response I got to my POST request:
+            201 Created
+            Location: http://www.youtypeitwepostit.com/api/47210977342911065
+        When you get a 201 response code, the Location header tells you where to look for the
+        thing you just created. RFC 2616 specifies the meaning of the 201 response code and
+        the Location header, but the Collection+JSON specification mentions this as well, just to be clear.
+
+    Application Semantics Create the Semantic Gap
+        Of course, the Collection+JSON constraints don’t constrain everything. Collection
+        +JSON doesn’t specify that the items in a collection should be microblog posts with a
+        date_posted and a text. I made that part up, because I wanted to design a simple
+        microblogging example for this book. If I’d chosen to do a “recipe book” example, I
+        could still use Collection+JSON, but the items would have data fields like ingredi
+        ents and preparation_time.
+!!      I’m going to call these extra bits of design the application semantics, because they vary
+        from one application to another. Application semantics are the cause of the semantic
+        gap I mentioned in Chapter 1.
+
+!!!     If the publishers of microblogging APIs got together and agreed to use a common set
+        of application semantics, the semantic gap for microblogging would disappear almost
+        entirely. (This would be a profile, and I’ll cover this idea in Chapter 8.) The more con‐
+        straints we share and the more compatible our designs, the smaller the semantic gap
+        and the more our users benefit.
+
+        Maybe you don’t want your API to be interoperable with your competitor’s APIs, but
+        there are better ways to differentiate yourself than by artificially widening the semantic
+        gap. My goal for this book is to get you focused on the parts of your API that have
+        something new to offer, in the spots where a semantic gap exists because no one else
+        has ever taken that path.
+
+===============================================================================================================
+===============================================================================================================
+Chapter  3 - Resources and representations
+
+    there’s no RFC for REST the way there is for HTTP or JSON.
+
+    REST is not a protocol, a file format, or a development framework. It’s a set of design
+    constraints: statelessness, hypermedia as the engine of application state, and so on. Col‐
+    lectively, we call these the Fielding constraints, because they were first identified in Roy
+    T. Fielding’s 2000 dissertation on software architecture, which gathered them together
+    under the name “REST.”
+
+    A Resource Can Be Anything
+        A resource is anything that’s important enough to be referenced as a thing in itself. If
+        your users might “want to create a hypertext link to it, make or refute assertions about
+        it, retrieve or cache a representation of it, include all or part of it by reference into another
+        representation, annotate it, or perform other operations on it” (Architecture), you
+        should make it a resource.
+
+        A resource is usually something that can be stored on a computer: an electronic docu‐
+        ment, a row in a database, or the result of running an algorithm. Architecture calls these
+        “information resources,” because their native form is a stream of bits. But a resource can
+        be anything at all: a pomegranate, a human being, the color black, the concept of courage,
+        the relationship between mother and daughter, or the set of all prime numbers. The only
+        restriction is that every resource must have a URL.
+
+!!!     From the client’s perspective, it doesn’t matter what a resource is, because the client
+        never sees a resource. All it ever sees are URLs and representations.
+
+    A Representation Describes Resource State
+        When a client issues a GET request for a resource, the server should serve a document
+        that captures the resource in a useful way. That’s a representation—a machine-readable
+        explanation of the current state of a resource.
+
+        The server might describe a database row as an XML document, a JSON object, a set of
+        comma-separated values, or as the SQL INSERT statement used to create it. These are
+        all legitimate representations; it depends on what the client asks for
+
+!!!     A representation can be any machine-readable document containing any information about a resource.
+
+    Representations Are Transferred Back and Forth
+        When a client makes a POST request to create a new resource, it sends a representation:
+        the client’s idea of what the new resource should look like. The server’s job is to create
+        that resource, or else refuse to create it. The client’s representation is just a suggestion.
+        The server may add to, alter, or ignore any part of it. (Here, the server added a date_posted value
+        to the data.)
+
+        The Web works the same way. Back in Chapter 1, my fictional character Alice created
+        a new entry on a microblogging website by sending a POST request, along with a rep‐
+        resentation in application/x-www-form-urlencoded format:
+            message=Test&submit=Post
+        That doesn’t look anything like the complex HTML document Alice got in return, but
+        they were both representations of a microblog post that says, “Test.”
+
+!!!     We think of representations as something the server sends to the client. That’s because
+        when we surf the Web, most of our requests are GET requests. We’re asking for repre‐
+        sentations. But in a POST, PUT, or PATCH request, the client sends a representation to
+        the server. The server’s job is then to change the resource state so it reflects the incoming
+        representation
+
+!!!!!   The server sends a representation describing the state of a resource. The client sends a
+        representation describing the state it would like the resource to have. That’s represen‐
+        tational state transfer (REST).
+
+    Resources with Many Representations
+        A resource can have more than one representation. Government documents are often
+        made available in multiple languages. Some resources have an overview representation
+        that doesn’t convey much state, and a detail representation that includes everything.
+        Some APIs serve the same data in JSON and XML-based data formats. When this hap‐
+        pens, how is the client supposed to specify which representation it wants?
+
+        There are two strategies, and I’ll describe them in detail in Chapter 11. The first is content
+        negotiation, in which the client distinguishes between representations based on the
+        value of an HTTP header. The second is to give the resource multiple URLs—one URL
+        for every representation.
+
+        Just as one person may be addressed by different names in different contexts,1 one
+        resource may be identified by many URLs. (Dan, Mr Testehan, Teshte)
+
+    The Protocol Semantics of HTTP
+        The HTTP standard defines eight different kinds of messages. These four are the most
+        commonly used:
+            GET - Get a representation of this resource.
+            DELETE - Destroy this resource.
+            POST - Create a new resource underneath this one, based on the given representation.
+            PUT - Replace this state of this resource with the one described in the given representation.
+        These two methods are mostly used as a client explores an API:
+            HEAD - Get the headers that would be sent along with a representation of this resource, but
+                    not the representation itself.
+            OPTIONS - Discover which HTTP methods this resource responds to.
+
+        (The other two methods defined in the HTTP standard, CONNECT and TRACE, are
+         only used with HTTP proxies. I won’t be covering them.)
+
+    GET
+        You’re surely familiar with this method already. The client sends a GET request to ask
+        for a representation of a resource, identified by a URL.
+
+!!!!    Sending a GET request to the server should have the same effect on re‐
+        source state as not sending a GET request—that is, no effect at all. Incidental side effects
+        like logging and rate limiting are OK, but a client should never make a GET request
+        hoping that it will change the resource state.
+
+        The most common response code to a GET request is 200 (OK). Redirect codes like 301
+        (Moved Permanently) are also common.
+
+    DELETE
+        The client sends a DELETE request when it wants a resource to go away. The client
+        wants the server to destroy the resource and never refer to it again. Of course, the server
+        is not obliged to delete something it doesn’t want to.
+
+        If a DELETE request succeeds, the possible status codes are 204 (No Content, i.e., “it’s
+        deleted, and I don’t have anything more to say about it”), 200 (OK, i.e., “it’s deleted, and
+        here’s a message about that”); and 202 (Accepted, i.e., “I’ll delete it later”).
+        If a client tries to GET a resource that has been DELETEd, the server will return an error
+        response code, usually 404 (Not Found) or 410 (Gone)
+
+    Idempotence
+        DELETE method has another useful property: it’s idempotent.
+
+        Once you delete a resource, it’s gone. The resource state has permanently changed. You
+        can send another DELETE request, and you might get a 404 error, but the resource state
+        is exactly as it was after the first request. The resource is still gone.
+
+        idempotence = Sending a request twice has the same effect on resource state as sending it once.
+
+        Idempotence is a useful feature, because the Internet is not a reliable network. Suppose
+        you send a DELETE request and your connection times out. You never got a response,
+        so you don’t know if the DELETE went through. You can just send that DELETE request
+        again, and keep trying until you get a response. Nothing extra will happen if a DELETE
+        goes through twice instead of once.
+
+        The notion of idempotence comes from math. Multiplying a number by zero is an
+        idempotent operation. 5 × 0 is zero, but 5 × 0 × 0 is also zero.
+        HTTP DELETE effectively multiplies a resource by zero.
+        Multiplying by 1 is a safe operation, the way HTTP GET is supposed to be safe. You can
+        multiply a number by 1 all day long, and nothing will change.
+        Every safe operation is also idempotent.
+
+    POST-to-Append
+        The POST method has two jobs, which I’ll cover separately.
+        The first is POST-to-append, in which sending a POST request to a resource creates a new resource underneath it.
+        When a client sends a POSTto-append request, it sends a representation of the resource it wants to create in the
+        request’s entity-body.
+
+        The most common response code to a POST-to-append request is 201 (Created). It lets
+        the client know that a new resource was created. The Location header lets the client
+        know the URL to this new resource. Another common response code is 202 (Accept
+        ed), which means that the server intends to create a new resource based on the given
+        representation, but hasn’t actually created it yet.
+
+        That’s POST-to-append. But you’ve probably used POST for all sorts of things other
+        than “create a new resource.” That’s the other job of POST. That’s called overloaded
+        POST, and I’ll talk about it later in this chapter.
+
+    PUT
+        A PUT request is a request to modify resource state. The client takes the representation
+        it got from a GET request, modifies it, and sends it back as the payload of a PUT request.
+
+        If the server decides to accept a PUT request, the
+        server changes the resource state to match what the client says in the representation,
+        and usually sends either 200 (OK) or 204 (No Content).
+
+        PUT is idempotent, just like DELETE. If you send the same PUT request 10 times, the
+        result is the same as if you’d only sent it once.
+
+        PUT is an idempotent operation even when you use it to create a new resource. If I send that PUT request
+        five times, it won’t create five posts with the same text (the way five POST requests might).
+
+    PATCH
+        The PUT rule can also lead to unintentional conflicts with other users who
+        are modifying the same document. It would be nice if you could just send the server the
+        parts of the document you want to change.
+
+        The PATCH method allows for this. Instead of PUTting a full representation, you can
+        create a special “diff ” representation and send it to the server as the payload of a PATCH request.
+
+        The best response codes for a successful PATCH are the same as for PUT and DELETE:
+        200 (OK) if the server wants to send data (such as an updated representation of the
+        resource) along with its response, and 204 (No Content) if the server just wants to
+        indicate success.
+
+!!      Remember that PATCH is not defined in the HTTP specification. It’s an extension de‐
+        signed specifically for web APIs, and it’s relatively recent (RFC 5789 was published in
+        2010). This means that tool support for PATCH, and for the diff documents it uses, is
+        not as good as the support for PUT.
+
+    LINK and UNLINK
+        LINK and UNLINK manage the hypermedia links between resources. To understand
+        these methods, you must understand hypermedia and link relations, so I’m going to
+        defer a detailed discussion to Chapter 11.
+
+        LINK and UNLINK are idempotent, but not safe. These methods are defined in an
+        Internet-Draf
+
+    HEAD
+        HEAD is a safe method, just like GET. In fact, it’s best to think of HEAD as a lightweight
+        version of GET. The server is supposed to treat a HEAD request exactly the same as a
+        GET request, but it’s not supposed to send a an entity-body—only the HTTP status code
+        and the headers
+
+        Using HEAD instead of GET may not save any time (the server still has to generate all
+        the appropriate HTTP headers), but it will definitely save bandwidth.
+
+    OPTIONS
+        OPTIONS is a primitive discovery mechanism for HTTP. The response to an OPTIONS
+        request contains the HTTP Allow header, which lays out which HTTP methods the
+        resource supports.
+
+!!!     OPTIONS is a good idea, but almost nobody uses it. Well-designed APIs advertise a
+        resource’s capabilities by serving hypermedia documents (see Chapter 4) in response to
+        GET requests. The links and forms in those documents explain what HTTP requests a
+        client can make next. Poorly designed APIs use human-readable documentation to ex‐
+        plain which HTTP requests a client can make.
+
+    Overloaded POST
+!!!!!   Now it’s time to reveal the skeleton in the HTTP closet. The HTTP POST method has
+        a dirty secret, one you’ve certainly encountered if you’ve ever worked in web develop‐
+        ment. POST is not solely used to create new resources. On the Web we surf with our
+        browsers, HTTP POST is used to convey any kind of change. It’s PUT, DELETE, PATCH,
+        LINK, and UNLINK all rolled into one.
+
+!!!!!   In terms of protocol semantics, this operation—“edit this blog post”—sounds like a PUT
+        request. But an HTML form can’t trigger a PUT request. The HTML data format doesn’t
+        allow it. So we use POST instead.
+
+        The definition is so vague that a POST request really has no protocol semantics at all. POST doesn’t
+        really mean “create a new resource”; it means “whatever!”
+        I call this “whatever!” usage of POST overloaded POST. Because an overloaded POST
+        request has no protocol semantics, you can only understand it in terms of its application
+        semantics.
+
+    Which Methods Should You Use?
+        The protocol semantics of HTTP are mostly defined by the HTTP methods. But there’s
+        a lot of redundancy in these methods. PUT can substitute for PATCH. GET can do the
+        job of HEAD. POST can substitute for anything. Do we really need all these methods?
+
+        The methods I recommend for use in most web APIs are GET, POST, PUT, DELETE,
+        and PATCH. But I can think of a lot of cases where I’d recommend different methods:
+            • Before 2008, the PATCH method didn’t exist. Back then, the method set I recom‐
+            mended for web APIs was GET, POST, PUT, and DELETE
+            • When we humans surf around on our web browsers, we completely ignore most of
+            the methods defined in the HTTP specification, and get by with just GET and POST.
+            That’s because the protocol semantics of HTML documents only allow for GET and POST.
+
+===============================================================================================================
+===============================================================================================================
+Chapter  4 - Hypermedia
+
+    Look closer, and you’ll see a question that hasn’t been answered: how does the client
+    know which requests it can make? There are infinitely many URLs. How does a client
+    know which URLs have representations behind them and which ones will give a 404
+    error? Should the client send an entity-body with its POST request? If so, what should
+    the entity-body look like?
+
+!!! The missing piece of the puzzle is hypermedia. Hypermedia connects resources to each
+    other, and describes their capabilities in machine-readable ways. Properly used, hyper‐
+    media can solve—or at least mitigate—the usability and stability problems found in
+    today’s web APIs.
+
+    Like REST, hypermedia isn’t a single technology described by a standards document
+    somewhere. Hypermedia is a strategy, implemented in different ways by dozens of technologies
+
+!!!!! The hypermedia strategy always has the same goal. Hypermedia is a way for the server
+      to tell the client what HTTP requests the client might want to make in the future. It’s a
+      menu, provided by the server, from which the client is free to choose. The server knows
+      what might happen, but the client decides what actually happens.
+
+    But in the world of APIs, hypermedia is a confusing and controversial topic.
+    That’s why today’s APIs are terrible at managing change.
+    In this chapter, I want to dispel the mystery of hypermedia, so you can create APIs that
+    have some of the flexibility of the Web.
+
+    HTML as a Hypermedia Format
+        The <a> tag is a simple hypermedia control. It’s a description of an HTTP request your
+        browser might make in the near future. An <a> tag is a signal to your browser that it
+        can make an HTTP GET request
+        An <a> tag is a promise from the web server that a certain URL names a resource you can visit
+
+!!!     To sum up, the familiar HTML controls allow the server to describe four kinds of HTTP requests.
+        • The <a> tag describes a GET request for one specific URL, which is made only if
+        the user triggers the control.
+        • The <img> tag describes a GET request for one specific URL, which happens auto‐
+        matically, in the background.
+        • The <form> tag with method="POST" describes a POST request to one specific URL,
+        with a custom entity-body constructed by the client. The request is only made if
+        the user triggers the control.
+        • The <form> tag with method="GET" describes a GET request to a custom URL con‐
+        structed by the client. The request is only made if the user triggers the control.
+
+        Fielding (guy who first wrote about REST) dissertation:
+        Hypermedia is defined by the presence of application control information embedded
+        within, or as a layer above, the presentation of information.
+
+        The World Wide Web is full of HTML documents, and the documents are full of things
+        people like to read—prices, statistics, personal messages, prose, and poetry. But all of
+        those things fall under  "presentation of information"
+
+        It’s the "application control information" that distinguishes an HTML document from a
+        book. I’m talking about the hypermedia controls that people interact with all the time,
+        but rarely examine closely. The <img> tags that tell the browser to embed certain images,
+        the <a> tags that transport the end user to another part of the Web
+
+    URI Templates
+        But URI Templates, a different hypermedia technology, can do this. URI Templates are defined in RFC 6570,
+        and they look like this:
+            http://www.youtypeitwepostit.com/search/{search}
+        That’s not a valid URL, because it contains curly brackets.
+        Those brackets identify the string as a URI Template. RFC 6570 tells you how to turn that string into an
+        infinite number of URLs. It says you can replace {search} with any string you want, so long as
+        that string would be valid in a URL:
+            • http://www.youtypeitwepostit.com/search/rest
+            • http://www.youtypeitwepostit.com/search/RESTful%20Web%20APIs
+
+        Although a URI Template is shorter and more flexible than an HTML GET form, the
+        two technologies aren’t much different. URI Templates and HTML forms allow a web
+        server to describe an infinite number of URLs with a short string. The HTTP client can
+        plug in some values, choose one URL from that infinite family, and make a GET request
+        to that specific URL.
+
+        URI Templates don’t make sense on their own. A URI Template needs to be embedded
+        in a hypermedia format. The idea is that every standard that needs this functionality
+        should just use URI Templates, instead of defining a custom format, which is what was
+        happening before RFC 6570 was published.
+
+    URI Versus URL
+        A URL is a short string used to identify a resource. A URI is also a short string used to
+        identify a resource. Every URL is a URI. They’re described in the same standard: RFC 3986.
+
+!!!!!   What’s the difference? As far as this book is concerned, the difference is this: there’s no
+        guarantee that a URI has a representation. A URI is nothing but an identifier. A URL is
+        an identifier that can be dereferenced. That is, a computer can somehow take a URL and
+        get a representation of the underlying resource
+
+        Here’s a URI that’s not a URL: urn:isbn:9781449358063. It designates a resource: the
+        print edition of this book. Not any particular copy of this book, but the abstract concept
+        of an entire edition. (Remember that a resource can be anything at all.) This URI is not
+        a URL because… what’s the protocol? How would a computer get a representation? You
+        can’t do it.
+
+        Without a URL, you can’t get a representation. Without representations, there can be
+        no representational state transfer.
+
+        Here’s a URL that identifies the print edition of this book: http://shop.oreilly.com/prod
+        uct/0636920028468.do.
+
+!!!     In general, when your web API refers to a resource, it should use a URL with the http
+        or https scheme, and that URL should work: it should serve a useful representation in
+        response to a GET request.
+
+    The Link Header
+        Here’s a technology that puts hypermedia where you might not expect it: inside the
+        headers of an HTTP request or response. RFC 5988 defines an extension to HTTP, a
+        header called Link. This header lets you add simple hypermedia controls to entitybodies that don’t normally
+        support hypermedia at all, like JSON objects and binary image files.
+
+        Here’s a plain-text representation of a story that’s been split into multiple parts with
+        cliffhangers (the entity-body of this HTTP response contains the first part of the story,
+        and the Link header points to the second part)
+
+            HTTP/1.1 200 OK
+            Content-Type: text/plain
+            Link: <http://www.example.com/story/part2>;rel="next"
+            It was a dark and stormy night. Suddenly, a...
+            (continued in part 2)
+
+        The Link header has approximately the same functionality as an HTML <a> tag. I rec‐
+        ommend you use real hypermedia formats whenever possible, but when that’s not an
+        option, the Link header can be very useful.
+
+    What Hypermedia Is For
+        Hypermedia controls have three jobs:
+            • They tell the client how to construct an HTTP request: what HTTP method to use,
+            what URL to use, what HTTP headers and/or entity-body to send.
+            • They make promises about the HTTP response, suggesting the status code, the
+            HTTP headers, and/or the data the server is likely to send in response to a request.
+            • They suggest how the client should integrate the response into its workflow.
+
+    Guiding the Request
+        An HTTP request has four parts: the method, the target URL, the HTTP headers, and
+        the entity-body. Hypermedia controls can guide the client into specifying all four of these.
+
+        This HTML <a> tag specifies both the target URL and the HTTP method to use:
+            <a href="http://www.example.com/">An outbound link</a>
+        The target URL is defined explicitly, in the href attribute. The HTTP method is defined
+        implicitly: the HTML spec says that an <a> tag becomes a GET request when the end
+        user clicks the link.
+
+        This HTML form defines the method, the target URL, and the entity-body of a potential
+        future HTTP request:
+            <form action="/stores" method="get">
+             <input type="text" name="storeName" value="" />
+             <input type="text" name="nearbyCity" value="" />
+             <input type="submit" value="Lookup" />
+            </form>
+
+        Ordinarily, the entity-body of an HTML POST form is form-encoded, and sent over
+        the network with the Content-Type header set to application/x-www-formurlencoded. But specifying the enctype
+        attribute of the <form> tag overrides this behavior. A form with enctype="text/plain" tells the browser to
+        encode its entity-body in a plain text format, and to send it over the network with the Content-Type header
+        set to text/plain.
+
+    Workflow Control
+        An HTML document can embed more than images. Here’s some HTML markup that
+        downloads and runs some executable code written in JavaScript:
+            <script type="application/javascript" src="/my_javascript_application.js"/>
+        Here’s some markup that downloads a CSS stylesheet and applies it to the main document:
+            <link rel="stylesheet" type="text/css" href="/my_stylesheet.css"/>
+
+        The process of embedding one document in another is also called transclusion.
+
+    Beware of Fake Hypermedia
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+        {
+         "title": "Example: A Novel",
+         "description": "http://www.example.com/"
+        }
+
+        This is a representation of a book. The description field happens to look like a URL:
+        http://www.example.com/. But is this a link? Is description supposed to link to a re‐
+        source that gives the description? Or is it supposed to be a textual description, and some
+        smart aleck typed in some text that happens to be a valid URL?
+
+        If you’re trying to consume an API like this, you won’t get very far dogmatically denying
+        the existence of links. Instead, you’ll read some human-readable documentation written
+        by the API provider. That documentation will explain the conventions the provider used
+        to embed hypermedia links in a format (JSON) that doesn’t support hypermedia. Then
+        you’ll know how to distinguish between links and strings, and you’ll be able to write a
+        client that can detect and follow the hypermedia links.
+        But your client will only work for that specific API
+
+!!!!!   That’s why API designers shouldn’t design APIs that serve plain JSON. You should use
+        a media type that has real support for hypermedia. Your users will thank you. They’ll
+        be able to use preexisting libraries written against the media type, rather than writing
+        new ones specifically for your API.
+
+        JSON has been the most popular representation format for APIs for quite a while, but
+        as recently as a couple years ago, there were no JSON-based hypermedia formats. As
+        you’ll see in the next few chapters, that has changed. Don’t worry that you’ll have to give
+        up JSON to gain real hypermedia.
+
+
+    The Semantic Challenge: How Are We Doing?
+         At the end of Chapter 1, I set out a challenge: “How can we program a computer to
+         decide which links to click?” A web browser works by passing the representations it gets
+         to a human, who makes all the decisions. How can we get similar behavior without
+         consulting a human at each step?
+
+!!!!!    Providing the links is a step in the right direction. Out of the infinite set of legal HTTP
+         requests, a hypermedia document explains which requests might be useful right now,
+         on this particular site. The client doesn’t have to guess.
+
+         But that’s not enough. Suppose an HTML document contains only two links, A and B.
+         Two possible requests the client might make. How does the client choose? On what basis
+         can it make its decision?
+
+         When I think about application semantics, I usually think on a higher level than that. I
+         think about the concepts that separate a wiki from an online store. They’re both websites,
+         they both use embedded images and scripts, but they mean very different things.
+
+!!!!!    A hypermedia format doesn’t have to be generic like HTML. It can be defined in enough
+         detail to convey the application semantics of a wiki or a store. In the next chapter, I’ll
+         talk about hypermedia formats that are designed to represent one specific type of prob‐
+         lem. Outside that problem space, they’re practically useless. But within their limits, they
+         meet the semantic challenge very well.
+
+===============================================================================================================
+===============================================================================================================
+Chapter  5 - Domain specific designs
+
+    In this chapter, I’ll choose a problem space and implement a web API for representing
+    it. The details of the problem space don’t matter. The technique is always the same.
+
+    Figure 5-1 s shows a simple maze with one entrance and one exit. My server’s job will be
+    to invent mazes like this and present them to clients.
+
+!!  Although this is a frivolous example, the maze is a good metaphor for hypermedia
+    applications in general. Any complex problem can be represented as a hypermedia maze
+    that the client must navigate. If you’ve ever been trapped in a phone tree, or searched
+    for products on an online store and then bought something from the search results,
+    you’ve navigated a hypermedia maze.
+
+    All of these APIs have the same shape as the maze games I’m about to show you:
+        • The problem is too complex to be understood all at once, so it’s split up into steps.
+        • Every client begins the process at the same first step.
+        • At each step in the process, the server presents the client with a number of possible
+        next steps.
+        • At each step, the client decides what next step to take.
+        • The client knows what counts as success and when to stop
+
+    Maze+XML: A Domain-Specific Design
+        That’s a graphical representation of a maze. It makes intuitive sense to a human, but a computer
+        would need to run it through a machine vision algorithm to understand it. How can we represent the shape of
+        a maze in a format that’s easy for a computer to understand?
+
+        There are many possible solutions, but instead of designing a solution from scratch, I’m
+        going to reuse some work that’s already been done. There’s a personal standard called
+        Maze+XML, for representing mazes in a machine-readable format.
+        The media type of a Maze+XML document is application/vnd.amundsen.maze+xml.
+
+        In general, I don’t recommend creating new domain-specific media types. It’s usually
+        less work to add application semantics to a generic hypermedia format—a technique
+        I’ll cover in the next two chapters
+
+        Each cell in a Maze+XML maze is an HTTP resource with its own URL. If you send a
+        GET request to the first cell in this maze, you’ll get a representation that looks like this:
+            <maze version="1.0">
+             <cell href="/cells/M" rel="current">
+             <title>The Entrance Hallway</title>
+             <link rel="east" href="/cells/N"/>
+             <link rel="west" href="/cells/L"/>
+             </cell>
+            </maze>
+
+    Link Relations
+        This representation shows off a powerful hypermedia tool called the link relation. By
+        themselves, rel="east" and rel="west" don’t mean anything.
+        But the Maze+XML standard defines meanings for “east” and “west,” and developers can program those
+        definitions into their clients. Here are the definitions:
+
+        east
+            Refers to a resource to the east of the current resource. When used in the Maze
+            +XML media type, the associated URI points to a neighboring cell resource to the
+            east in the active maze.
+        west
+            Refers to a resource to the west of the current resource. When used in the Maze
+            +XML media type, the associated URI points to a neighboring cell resource to the
+            west in the active maze.
+
+        A link relation is a magical string associated with a hypermedia control like Maze+XML’s
+        <link> tag. It explains the change in application state (for safe requests) or resource
+        state (for unsafe requests) that will happen if the client triggers the control
+
+!!!!!   One of the most important web pages for a RESTful API developer is the registry of link
+        relations managed by the Internet Assigned Numbers Authority (IANA).
+            http://www.iana.org/assignments/link-relations/link-relations.xhtml
+        I’ll be coming back to this registry throughout the book. It contains about 60 link relations that have
+        been deemed to be generally useful and not tied to a particular data format. The simplest
+        examples are the next and previous relations, for navigating a list.
+
+!!!     RFC 5988 defines two kinds of link relations: registered relation types and extension
+        relation types. Registered link relations look like the ones you see in the IANA registry:
+        short strings like east and previous. To avoid conflicts, these short strings need to be
+        registered somewhere—not necessarily with the IANA, but in some kind of standard
+        such as the definition of a media type.
+        Extension relations look like URLs. If you own mydoma.in, you can name a link relation
+        http://mydoma.in/whatever and define it to mean anything you want. No one can
+        define a link relation that conflicts with yours, since you control the domain. When
+        your users visit http://mydoma.in/whatever in their web browsers, they should see a
+        human-readable explanation of the link relation.
+
+!!!     Chapter 9 includes a guide explaining when it’s OK to use the shorter names of registered
+        relations. Here’s a summary:
+            • You can use extension relations wherever you want.
+            • You can use IANA-registered link relations whenever you want.
+            • If a document’s media type defines some registered relations, you can use them
+            within the document.
+            • If a document includes a profile that defines some link relations (see Chapter 8),
+            you can treat them as registered relations within that document.
+            • Don’t give your link relations names that conflict with the names in the IANA
+            registry
+
+        (this refer to the string that is put in the "rel" attribute of the "link" html element)
+         https://www.w3schools.com/tags/tag_link.asp
+
+    The Collection of Mazes  (Dan : nice example of everything learned so far)
+!!      The URL to the collection of mazes is the proverbial “URL advertised on the billboard.”
+        Starting with no information but this URL, you can do everything it’s possible to do
+        with a Maze+XML API:
+            1. Start off by GETting a representation of the collection of mazes. You know how to
+            parse the representation, because you read the Maze+XML specification and pro‐
+            grammed this knowledge into your client.
+            2. Your client also knows that the link relation maze indicates an individual maze. This
+            gives it a URL it can use in a second GET request. Sending that GET request gives
+            you the representation of an individual maze.
+            3. Your client knows how to parse the representation of an individual maze (because
+            you programmed that knowledge into it), and it knows that the link relation start
+            indicates an entrance into the maze. You can make a third GET request to enter the
+            maze.
+            4. Your client knows how to parse the representation of a maze cell. It knows what
+            east, west, north, and south mean, so it can translate movement through an ab‐
+            stract maze into a series of HTTP GET requests.
+            5. Your client knows what exit means, so it knows when it’s completed a maze.
+
+        There’s more to the Maze+XML standard, but you’ve now seen the basics. A collection
+        links to a maze, which links to a cell. From one cell you can follow links to other cells.
+        Eventually you’ll find a cell with an exit link leading out of the maze. That’s enough
+        information to start writing clients.
+
+    Is Maze+XML an API?
+!!!!    If you’ve got experience in this field, you may be wondering: where’s the API? A maze
+        game isn’t a complex application, but even so, you may have expected more than a few
+        XML tag names and link relations. The Maze+XML specification lacks the things you
+        may be accustomed to. It doesn’t define any API calls or give any rules for constructing
+        URLs. In fact, it barely mentions HTTP at all! I’ve shown some URLs in the example
+        representations, but I deliberately made the URL formats internally inconsistent (com‐
+        pare /beginner to /expert-maze/start) so you wouldn’t think URL formats were defined
+        by the standard.
+
+!!      My experience shows that the “API call” metaphor inevitably exposes the server’s im‐
+        plementation details to the clients. This introduces coupling between server code and
+        client code. When all the people involved with the API are friends and colleagues, this
+        doesn’t matter so much.
+
+!!!!!   But this book focuses on web APIs, which is to say, web-scale APIs (i.e., APIs where any
+        member of the public can use a client, or write a client, or, in some cases, write a server).
+        When you allow someone outside your organization to make API calls, you make that
+        person a silent partner in the implementation of your server. It becomes very difficult
+        to change anything on the server side without hurting this unknown customer
+
+        This is why public APIs change so rarely. You can’t change an API based on API calls
+        without causing huge pain among your users
+
+!!      Designs based on hypermedia have more flexibility. Every time the client makes an
+        HTTP request, the server sends a response explaining which HTTP requests make the
+        most sense as a next step. If the server-side options change, that document changes
+        along with it. This doesn’t solve all of our API problems—the semantic gap is a huge
+        problem!—but it solves the one we know how to solve.
+
+    Client #1: The Game
+        The obvious use for the Maze+XML API is a game to be played by a human being. (source code for this is on
+        github...it is a nodeJs app)
+
+        We tend to think of an “API client” as an automated client. But human-driven clients
+        like this have a big part to play in the modern API ecosystem. It’s very common for a
+        mobile application, driven by a human, to communicate with a server through a web
+        API. Best of all, with a human in the loop, the semantic gap is no problem
+
+    Clients Do the Job They Want to Do
+        These three clients—the Game, the Mapmaker, and the Boaster—all work from an un‐
+        derstanding of the Maze+XML media type. But they have different goals, so they do
+        different things with the same data
+
+        This is fine. The server’s job is to describe mazes in a way that the client can engage with.
+        The server’s job is not to dictate goals to the client. The Maze+XML spec describes a
+        problem space, not a prescribed relationship between client and server. Client and server
+        must share an understanding of the representations they’re passing back and forth, but
+        they don’t need to have the same idea of what the problem is that needs to be solved.
+
+    Extending a Standard
+        Maze+XML is a contrived example in a frivolous problem domain. But let’s imagine
+        that someone really does want to serve hypermedia mazes, either as part of a business
+        or just for fun. That doesn’t automatically make Maze+XML the right answer. Even
+        when a standard already exists for your problem domain, it probably won’t fit your
+        needs exactly
+
+        Creating an entirely new standard from scratch just to support three-dimensional mazes
+        would be silly. The Maze+XML standard is almost good enough. I just have to extend
+        it a little to make it support two new directions: up and down.
+        Fortunately, Maze+XML explicitly allows this sort of extension (see section 5 of the
+        specification). I can add anything I want to a Maze+XML document, so long as I don’t
+        redefine something that’s already in the specification. To get my three-dimensional ma‐
+        zes, I’ll just define two new link relations right here:
+            up
+                Refers to a resource spatially above the current resource.
+            down
+                Refers to a resource spatially below the current resource
+
+        This is a simple extension, but it completely changes what a maze can look like, and
+        how a maze can be stored on the server. My server implementation stores a maze in a
+        two-dimensional array of cells, with each cell having four possible neighbors. To support
+        these two new relations, I need to change the server code to reflect the fact that a maze
+        is a three-dimensional array and each cell now has six possible neighbors
+
+        But the client won’t see a big change at all. The client just sees two new link relations in
+        the representations:
+            <maze version="1.0">
+             <cell href="/cells/middle-of-ladder">
+             <title>The Middle of the Ladder</title>
+             <link rel="up" href="/cells/top-of-ladder"/>
+             <link rel="down" href="/cells/bottom-of-ladder"/>
+             </cell>
+            </maze>
+
+        All that extra server-side complexity is hidden from the client by the very thing that
+        makes the Maze+XML standard seem simplistic. The standard just doesn’t say much
+        about what a maze “should” look like. Defining two new ways for cells to be connected
+        requires a complete redesign of my server implementation, but the representations are
+        still compliant with the Maze+XML standard, and the clients can still parse them.
+
+!!!!    But this doesn’t mean the clients automatically understand these new application se‐
+        mantics. Consider what happens when the Game, the Mapmaker, and the Boaster are
+        served a three-dimensional maze.
+
+!!!!!   Surprisingly, the Game works just fine! That client wasn’t hardcoded to know about the
+        four cardinal directions. It was programmed to present every link it finds to the user,
+        and to let the user choose between them. Since I chose the names “up” and “down” for
+        my new link relations, a human being traversing a three-dimensional maze will see a
+        screen with those new options
+
+        The Boaster client also fares well in a three-dimensional maze, since it never even enters
+        the maze. In fact, the Boaster should work on any Maze+XML-compatible server, no
+        matter what extensions are made to it
+
+        If the Mapmaker ever gets a representation like this, it will follow the “east” link and the
+        “north” link, but never the “up” link. Set the Mapmaker loose on a three-dimensional
+        maze and it will map one level of the maze. It will see only a two-dimensional slice of
+        the maze.
+
+        Even if the Mapmaker knew how to follow an “up” link, it wouldn’t know how to rep‐
+        resent what it found at the other end of the link. The Mapmaker client has a twodimensional mind, just
+        like our example server implementation. It generates twodimensional ASCII maps. A three-dimensional maze
+        is completely incompatible with the Mapmaker client. (because the mapmaker draws the maze in ASCII chars,
+        so it knows to draw just 2d mazes, not 3D)
+
+        I’ve found that this rule holds in general. A client written against a specific server im‐
+        plementation can be optimized for that server’s quirks, but it will fall down if you try to
+        run it against another implementation of the same standard. This doesn’t mean the
+        Mapmaker is a completely useless client; it’s just that it can only map certain mazes.
+
+!!!     Imagine starting up a web browser that’s only ever been tested against one particular
+        website. As soon as you send that browser to a site it wasn’t tested on, it’s going to crash.
+        That’s the situation here. A standard like Maze+XML may have multiple server imple‐
+        mentations. Client implementations need to be designed to work against all server im‐
+        plementations, not just one.
+
+    Maze as Metaphor
+!!!!!   The similarity is no coincidence. As I said at the beginning of this chapter, the maze is
+        a metaphor for hypermedia applications in general. Some “mazes” are tidy and wellbehaved. Others are chaotic
+        and infinitely large. Thinking of a state diagram as a maze
+        to be navigated will get you in the right frame of mind to understand hypermedia APIs.
+
+    Meeting the Semantic Challenge
+        For the designer of a domain-specific API, bridging the semantic gap is a two-step process:
+            1. Write down your application semantics in a human-readable specification (like the
+            Maze+XML standard).
+            2. Register one or more IANA media types for your design, (like vnd.amundsen.ap
+            plication/maze+xml. In the registration, associate the media types with the
+            human-readable document you wrote. In Chapter 9, I’ll discuss the naming and
+            registration process for media types.
+
+        Your client developers can reverse the process to bridge the semantic gap in the other direction:
+            1. Look up an unknown media type in the IANA registry.
+            2. Read the human-readable specification to learn how to deal with documents of the
+            unknown media type.
+
+    Where Are the Domain-Specific Designs?
+        When you need to publish an API, the first thing to do is to try to find an existing
+        domain-specific design. There’s no point in duplicating someone else’s work.
+
+        There are hundreds of domainspecific data formats, but not many of them include hypermedia controls
+
+!!!!    But just because a data format doesn’t include hypermedia controls doesn’t mean it’s
+        useless. In Chapter 8, I’ll show you how JSON-LD can add basic hypermedia capabilities
+        to any JSON format. In Chapter 10, I’ll show how XForms and XLink can do the same
+        for XML. These technologies let you graft hypermedia controls onto an existing API
+        that doesn’t include them.
+
+    The Prize at the End
+        Consider the JPEG image format. It’s well documented, it’s got a registered media type
+        (image/jpeg), and nothing beats a binary image file for representing a photograph. But
+        you can’t use JPEG as the basis for a web API, any more than you could design a website
+        that serves nothing but JPEGs. There’s no way for one JPEG to link to another.
+
+!!!     It would be foolish to make up your own binary image format just
+        because JPEG doesn’t have any hypermedia controls. But JPEG will not be the core of a
+        hypermedia-based photo API. That honor will go to a format like HTML. HTML can’t
+        represent a photograph, but it can embed a photograph in a textual document, pair a
+        photograph with its caption, represent a list of photographs, and present forms for
+        tagging and searching photographs.
+
+!!!     An image/jpeg representation will be the client’s prize for navigating the photo API’s
+        hypermedia “maze” and locating one specific photo. The “maze” itself will be described
+        in a document format that supports hypermedia controls. The two formats will work
+        together to form a complete API.
+
+    Hypermedia in the Headers
+!!!!    I showed in Chapter 4 how you can use the HTTP header Link to add simple hypermedia
+        links and forms to documents that have no hypermedia controls of their own. Using
+        these headers, you could conceivably design an API that served nothing but JPEG im‐
+        ages, but I don’t recommend this.
+
+    Steal the Application Semantics
+        The hCard microformat lets you combine a vCard-like representation of a human being
+        with the hypermedia links and forms needed to implement a full web API.
+
+!!!!    This is another reason why it’s important to look for domain-specific data formats before
+        you set off to design your API. A standard like vCard represents a lot of time and money
+        spent identifying the application-level semantics for a problem domain. You don’t need
+        to start over just because vCard doesn’t have hypermedia controls
+
+        Even if you can’t directly reuse a domain-specific standard, you may be able to save
+        yourself some time by adapting its application-level semantics into a profile. But that’s
+        a topic for Chapter 8.
+
+    If You Can’t Find a Domain-Specific Design, Don’t Make One
+        If you can’t find a domain-specific API for your problem domain, don’t panic. People
+        just don’t define reusable, domain-specific, hypermedia-aware formats very often. That
+        doesn’t mean you have to start from scratch. You should be able to start with a stand‐
+        ardized foundation and extend it, reusing work done by other people whenever possible.
+        It’ll just take a little work on your part to glue everything together.
+
+        In the next two chapters, I’ll discuss some of these foundations. In particular, there are
+        a few domain-specific designs that deal with a domain so popular and so general—
+        collections of things—that I don’t really consider it a domain at all. It’s more like a design
+        pattern.
+
+    Kinds of API clients
+!!      A deep understanding of hypermedia won’t help you write a client for an API that doesn’t
+        serve hypermedia documents. When you’re writing a client, you’re at the mercy of the
+        server design, and pragmatism always trumps idealism. Right now, pragmatism means
+        adopting a different approach for every individual API.
+
+        This is my first attempt, presented humbly, to classify the clients
+        we write to achieve our goals.
+
+    Human-Driven Clients
+        Human-driven clients can have relatively simple logic because they don’t have to make
+        any decisions. They present representations to a human being, and convey the human’s
+        decisions back to the server. The differences between human-driven clients come down
+        to how faithful they are in presenting representations to their human users.
+
+        The more devoted a client is to faithfully rendering the representations it receives, and
+        not interposing its own judgment, the less likely it is to break when it encounters a
+        representation it wasn’t expecting.
+
+    Automated Clients
+        Automated clients receive representations but don’t render them. There’s no human to
+        see the rendering. These clients must bridge the semantic gap on their own, by deciding
+        which hypermedia controls to trigger. Of course, most clients don’t “decide” anything
+        at all. They carry out simple preprogrammed rulesets that hopefully help them reach
+        some predefined goal.
+
+        The crawler
+            The crawler simulates a very curious but not very picky human. Give it a URL to start
+            with, and it will fetch a representation. Then it will follow all the links it can find to get
+            more representations. It will do this recursively, until there are no more representations
+            to be had
+
+            Generally speaking, a crawler will only trigger state transitions that are safe. Otherwise,
+            there’s no telling what will happen to resource state. A crawler that sent a DELETE
+            request to every resource it encountered, just to see what happened, would be a terrible
+            client.
+
+        The monitor
+            The monitor is the opposite of the crawler. It simulates a human who’s obsessed with
+            one particular web page. Give it a URL to start with, and the monitor will fetch a rep‐
+            resentation of that URL and process it somehow. But it won’t follow any links. Instead,
+            the monitor will wait a while and fetch a new representation of the same resource.
+            Instead of triggering a hypermedia control to change the resource state, the monitor
+            waits for someone else to change the resource state, and checks back later to see what
+            happened.
+
+        The script
+            Most of today’s automated API clients are scripts. A script simulates a human with a set
+            routine that never changes. A script happens when a human is tired of this routine and
+            wants to automate it.
+
+            The human chooses an API and figures out out which state transitions (for an API that
+            serves hypermedia documents) or API calls (for a hypermedia-ignorant API) are nec‐
+            essary to carry out the routine. Then the human writes an algorithm that automates the
+            process of triggering those state transitions or making those API calls.
+
+            A script tends to break when the assumptions underlying it become invalid. A “maze
+            solver” client that always goes east three times can only solve a very small subset of
+            mazes. A screen-scraping script that extracts data from a website will break when the
+            HTML representations are redesigned.
+
+!!!!        A hypermedia-aware script is less likely to break when something trivial happens, like
+            the URL of a resource changing or new data being added to a representation. This means
+            a hypermedia API has some room to change without breaking the scripts that depend
+            on it. But a script is a playback of a human being’s thought process. If it encounters a
+            situation the human didn’t originally consider, the script won’t be able to fill in the blanks.
+
+        The agent
+            A software agent simulates a human being who is actively engaged with a problem. It’s
+            not as smart as a human, and it has no ability to make subjective judgments, but it does
+            what a human would do in the same situation. It looks at a representation, analyzes the
+            situation, and decides which hypermedia control to activate to get closer to its final goal.
+
+            The monitor doesn’t do this; it never activates hypermedia controls at all. The crawler
+            doesn’t do this; it activates every safe hypermedia control it can find. The script doesn’t
+            do this; it always activates the next hypermedia control it was programmed with.
+            Human-driven clients don’t do this; they delegate the task to the human. A software
+            agent is the only client that can be said to make autonomous “decisions.”
+
+            sophisticated agents would look like: the personal shoppers and automated news
+            gatherers of science fiction, and the high-frequency trading algorithms used in real-life
+            financial applications.
+
+===============================================================================================================
+===============================================================================================================
+Chapter  6 - The collection pattern
+
+    Collection+JSON is one of several standards designed not to represent one specific
+    problem domain (the way Maze+XML does), but to fit a pattern—the collection—that
+    shows up over and over again, in all sorts of domains. This standard makes a good
+    example, because it’s a formalized version of the JSON-based APIs that first-time de‐
+    signers tend to come up with. Collection+JSON lets you follow your natural design
+    inclinations without running afoul of the Fielding constraints.
+
+!!!!If there’s no domain-specific standard for your problem domain (and there probably
+    isn’t), you may be able to use a collection-based standard instead. Instead of starting
+    from nothing, you’ll be able to focus on adapting your application semantics to the
+    collection pattern. Not only will you save time, you’ll get access to a preexisting base of
+    client programs and server-side tools.
+
+    Although this chapter focuses on Collection+JSON, I’ll also cover the Atom Publishing
+    Protocol, or AtomPub. AtomPub is the original standard for collection-based APIs,
+    defined in RFC 5023. It’s a relatively old standard, but apart from its use in Google’s
+    public APIs, it hasn’t caught on—partly because it’s an XML-based format in a field now
+    dominated by JSON representations.
+
+    What’s a Collection?
+        A collection is a special kind of resource. Recall from Chapter 3 that a resource is any‐
+        thing important enough to have been given its own URL. A resource can be a piece of
+        data, a physical object, or an abstract concept—anything at all. All that matters is that
+        it has a URL and the representation—the document the client receives when it sends a
+        GET request to the URL.
+
+!!!!    A collection resource is a little more specific than that. It exists mainly to group other
+        resources together. Its representation focuses on links to other resources, though it may
+        also include snippets from the representations of those other resources. (Or even the
+        full representations!)
+
+    Collections Link to Items
+        An individual resource contained within a collection is sometimes called an item, an
+        entry, or a member of the collection. Think about the contact list on your friend’s phone.
+        You show up in that list: your name and your phone number. You’re an item in the
+        “contact list” collection.
+
+        When we talk about an “item” or an “entry” or a “member,” we’re talking about a standalone
+        resource that happens to be linked to from a collection’s representation.
+
+    Collection+JSON
+        Here’s a Collection+JSON document:
+        {
+        	"collection":{
+        		"version":"1.0",
+        		"href":"http://www.youtypeitwepostit.com/api/",
+        		"items":[
+        			{
+        				"href":"/api/messages/21818525390699506",
+        				"data":[
+        					{
+        						"name":"text",
+        						"value":"Test."
+        					},
+        					{
+        						"name":"date_posted",
+        						"value":"2013-04-22T05:33:58.930Z"
+        					}
+        				],
+        				"links":[
+
+        				]
+        			},
+        			{
+        				"href":"/api/messages/3689331521745771",
+        				"data":[
+        					{
+        						"name":"text",
+        						"value":"Hello."
+        					},
+        					{
+        						"name":"date_posted",
+        						"value":"2013-04-20T12:55:59.685Z"
+        					}
+        				],
+        				"links":[
+
+        				]
+        			}
+        		],
+        		"links":[
+        			{
+        				"href":"/logo.png",
+        				"rel":"icon",
+        				"render":"image"
+        			}
+        		],
+        		"queries":[
+        			{
+        				"href":"/api/search",
+        				"rel":"search",
+        				"prompt":"Search the microblog archives",
+        				"data":[
+        					{
+        						"name":"query",
+        						"value":""
+        					}
+        				]
+        			}
+        		],
+        		"template":{
+        			"data":[
+        				{
+        					"prompt":"Text of message",
+        					"name":"text",
+        					"value":""
+        				}
+        			]
+        		}
+        	}
+        }
+
+        It’s basically an object with five special properties, predefined slots for applicationc specific data:
+            href
+                A permanent link to the collection itself.
+            items
+                Links to the members of the collection, and partial representations of them.
+            links
+                Links to other resources related to the collection.
+            queries
+                Hypermedia controls for searching the collection.
+            template
+                A hypermedia control for adding a new item to the collection.
+
+    Representing the Item
+        "items":[
+        	{
+        		"href":"/api/messages/21818525390699506",
+        		"data":[
+        			{
+        				"name":"text",
+        				"value":"Test."
+        			},
+        			{
+        				"name":"date_posted",
+        				"value":"2013-04-22T05:33:58.930Z"
+        			}
+        		],
+        		"links":[
+
+        		]
+        	},
+        	{
+        		"href":"/api/messages/3689331521745771",
+        		"data":[
+        			{
+        				"name":"text",
+        				"value":"Hello."
+        			},
+        			{
+        				"name":"date_posted",
+        				"value":"2013-04-20T12:55:59.685Z"
+        			}
+        		],
+        		"links":[
+
+        		]
+        	}
+        ]
+
+        I say it’s the most important field because it makes it clear which items are in the col‐
+        lection. In Collection+JSON, each member is represented as a JSON object. Like the
+        collection itself, each member has a number of predefined slots that can be filled with
+        application-specific data:
+            The href attribute
+                A permanent link to the item as a standalone resource.
+            links
+                Hypermedia links to other resources related to the item.
+            data
+                Any other information that’s an important part of the item’s representation.
+
+        An item’s permanent link
+            You might be able to modify an item with HTTP PUT to its permanent link, or delete
+            it with HTTP DELETE. These are the item’s protocol semantics. They’re spelled out as
+            part of Collection+JSON’s definition of an “item.”
+
+        An item’s data
+            At the core of any Collection+JSON application are the application-level semantics
+            you’re trying to convey: the bits of data associated with each individual item. Most of
+            this data goes into an item’s data slot. That slot needs to contain a list of JSON objects,
+            each with the properties name and value, each describing a single key-value pair.
+
+            "data":[
+            	{
+            		"name":"text",
+            		"value":"Test.",
+            		"prompt":"The text of the microblog post."
+            	},
+            	{
+            		"name":"date_posted",
+            		"value":"2013-04-22T05:33:58.930Z",
+            		"prompt":"The date the microblog post was added."
+            	}
+            ]
+
+            The name attribute is the key of the key-value pair, the value is of course the value, and
+            the (optional) prompt is a human-readable description. The Collection+JSON standard
+            says nothing about what keys, values, or prompts you should use
+
+        An item’s links
+            The simplest of Collection+JSON’s hypermedia controls is the href attribute. I covered
+            this earlier; it’s a special link that provides a URL the client should use whenever it wants
+            to refer to one specific item:
+                "href" : "/api/messages/21818525390699506"
+
+            An item’s representation may also contain a list called links. This contains any number
+            of other hypermedia links to related resources. Here’s a link you might see in the rep‐
+            resentation of a “book” resource:
+                {
+                 "name" : "author",
+                 "rel" : "author",
+                 "prompt" : "Author of this book",
+                 "href" : "/authors/441",
+                 "render" : "link"
+                }
+
+            That’s approximately equivalent to this snippet of HTML:
+                <a href="/authors/441" id="author" rel="author">Author of this book</a>
+
+            The rel attribute is a slot for a link relation, just like the rel attribute in Maze+XML.
+            It’s a place for you to put some application semantics. The prompt attribute is a place to
+            put a human-readable description, like the link text inside an HTML <a> tag
+
+            Setting render to "link" tells a Collection+JSON client to present the link as an outbound link
+            (see Chapter 4), like an HTML <a> tag.
+            Setting render to "image" tells the client to present the link as an embedded image, like
+            HTML’s <img> tag.
+
+
+    The Write Template
+        Suppose you want to add a new item to a collection. What HTTP request should you
+        make? To answer this question, you need to look at the collection’s write template.
+
+        Here’s the write template for our microblogging API:
+            "template": {
+             "data": [
+                {"prompt" : "Text of message", "name" : "text", "value" : ""}
+             ]
+            }
+        Interpreting this template according to the Collection+JSON standard tells you it’s OK
+        to fill in the blanks and submit a document that looks like this:
+            { "template" :
+             {
+                "data" : [
+                    {"prompt" : "Text of the message", "name" : "text", "value" : "Squid!"}
+                ]
+             }
+            }
+
+        Where does that request go? The Collection+JSON standard says you add an item to a
+        collection by sending a POST request to the collection (i.e., to its href attribute):
+            "href" : "http://www.youtypeitwepostit.com/api/",
+
+        That means the write template is conceptually equivalent to this HTML form:
+            <form action="http://www.youtypeitwepostit.com/api/" method="post">
+                <label for="text">Text of the message</label>
+                <input id="text"/>
+                <input type="submit"/>
+            </form>
+
+        It’s not exactly the same, because filling out the HTML form sends an application/xwww-form-urlencoded
+        representation, and filling out a write template sends an application/vnd.collection+json representation.
+        But conceptually, those two hypermedia controls are very similar.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
