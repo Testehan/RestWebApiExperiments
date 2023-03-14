@@ -484,7 +484,7 @@ Chapter  3 - Resources and representations
         can send another DELETE request, and you might get a 404 error, but the resource state
         is exactly as it was after the first request. The resource is still gone.
 
-        idempotence = Sending a request twice has the same effect on resource state as sending it once.
+!!!     idempotence = Sending a request twice has the same effect on resource state as sending it once.
 
         Idempotence is a useful feature, because the Internet is not a reliable network. Suppose
         you send a DELETE request and your connection times out. You never got a response,
@@ -4829,14 +4829,9 @@ An API Designer’s Guide to the Fielding Dissertation
 TODO Add a readme with the most important notes from each chapter..
 
 TODO Create app that exposes application/vnd.collection+json as explained in the app/standard
-TODO Also you could play with various http codes and headers
 
 
 https://schema.org/docs/schemas.html
-
-
-
-
 
 
 Improving LinkedIn profile
