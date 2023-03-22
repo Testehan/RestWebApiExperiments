@@ -212,8 +212,220 @@
   meet the semantic challenge very well.
 
 ## 5. Domain specific designs
+* Although this is a frivolous example, the maze is a good metaphor for hypermedia
+  applications in general. Any complex problem can be represented as a hypermedia maze
+  that the client must navigate. If you’ve ever been trapped in a phone tree, or searched
+  for products on an online store and then bought something from the search results,
+  you’ve navigated a hypermedia maze.
+* A link relation is a magical string associated with a hypermedia control like Maze+XML’s
+  \<link\> tag. It explains the change in application state (for safe requests) or resource
+  state (for unsafe requests) that will happen if the client triggers the control
+* One of the most important web pages for a RESTful API developer is the registry of link
+  relations managed by the Internet Assigned Numbers Authority (IANA).
+  http://www.iana.org/assignments/link-relations/link-relations.xhtml
+  I’ll be coming back to this registry throughout the book. It contains about 60 link relations that have
+  been deemed to be generally useful and not tied to a particular data format. The simplest
+  examples are the "next" and "previous" relations, for navigating a list.
+* Chapter 9 includes a guide explaining when it’s OK to use the shorter names of registered
+  relations. Here’s a summary:
+* * You can use extension relations wherever you want.
+* * You can use IANA-registered link relations whenever you want.
+* * If a document’s media type defines some registered relations, you can use them
+  within the document.
+* * If a document includes a profile that defines some link relations (see Chapter 8),
+  you can treat them as registered relations within that document.
+* * Don’t give your link relations names that conflict with the names in the IANA
+  registry
+  (this refer to the string that is put in the "rel" attribute of the "link" html element)
+  https://www.w3schools.com/tags/tag_link.asp
+*  The URL to the collection of mazes is the proverbial “URL advertised on the billboard.”
+   Starting with no information but this URL, you can do everything it’s possible to do
+   with a Maze+XML API:
+   1. Start off by GETting a representation of the collection of mazes. You know how to
+   parse the representation, because you read the Maze+XML specification and pro‐
+   grammed this knowledge into your client.
+   2. Your client also knows that the link relation maze indicates an individual maze. This
+   gives it a URL it can use in a second GET request. Sending that GET request gives
+   you the representation of an individual maze.
+   3. Your client knows how to parse the representation of an individual maze (because
+   you programmed that knowledge into it), and it knows that the link relation start
+   indicates an entrance into the maze. You can make a third GET request to enter the
+   maze.
+   4. Your client knows how to parse the representation of a maze cell. It knows what
+   east, west, north, and south mean, so it can translate movement through an ab‐
+   stract maze into a series of HTTP GET requests.
+   5. Your client knows what exit means, so it knows when it’s completed a maze.
+* Is Maze+XML an API?
+  If you’ve got experience in this field, you may be wondering: where’s the API? A maze
+  game isn’t a complex application, but even so, you may have expected more than a few
+  XML tag names and link relations. The Maze+XML specification lacks the things you
+  may be accustomed to. It doesn’t define any API calls or give any rules for constructing
+  URLs. In fact, it barely mentions HTTP at all! I’ve shown some URLs in the example
+  representations, but I deliberately made the URL formats internally inconsistent (com‐
+  pare /beginner to /expert-maze/start) so you wouldn’t think URL formats were defined
+  by the standard.
+* But this book focuses on web APIs, which is to say, web-scale APIs (i.e., APIs where any
+  member of the public can use a client, or write a client, or, in some cases, write a server).
+  When you allow someone outside your organization to make API calls, you make that
+  person a silent partner in the implementation of your server. It becomes very difficult
+  to change anything on the server side without hurting this unknown customer
+* Designs based on hypermedia have more flexibility. Every time the client makes an
+  HTTP request, the server sends a response explaining which HTTP requests make the
+  most sense as a next step. If the server-side options change, that document changes
+  along with it. This doesn’t solve all of our API problems—the semantic gap is a huge
+  problem!—but it solves the one we know how to solve.
+* Imagine starting up a web browser that’s only ever been tested against one particular
+  website. As soon as you send that browser to a site it wasn’t tested on, it’s going to crash.
+  That’s the situation here. A standard like Maze+XML may have multiple server imple‐
+  mentations. Client implementations need to be designed to work against all server im‐
+  plementations, not just one.
+* The similarity is no coincidence. As I said at the beginning of this chapter, the maze is
+  a metaphor for hypermedia applications in general. Some “mazes” are tidy and wellbehaved. Others are chaotic
+  and infinitely large. Thinking of a state diagram as a maze
+  to be navigated will get you in the right frame of mind to understand hypermedia APIs.
+* But just because a data format doesn’t include hypermedia controls doesn’t mean it’s
+  useless. In Chapter 8, I’ll show you how JSON-LD can add basic hypermedia capabilities
+  to any JSON format. In Chapter 10, I’ll show how XForms and XLink can do the same
+  for XML. These technologies let you graft hypermedia controls onto an existing API
+  that doesn’t include them.
+* I showed in Chapter 4 how you can use the HTTP header Link to add simple hypermedia
+  links and forms to documents that have no hypermedia controls of their own. Using
+  these headers, you could conceivably design an API that served nothing but JPEG im‐
+  ages, but I don’t recommend this.
+* This is another reason why it’s important to look for domain-specific data formats before
+  you set off to design your API. A standard like vCard represents a lot of time and money
+  spent identifying the application-level semantics for a problem domain. You don’t need
+  to start over just because vCard doesn’t have hypermedia controls
+*  A hypermedia-aware script is less likely to break when something trivial happens, like
+   the URL of a resource changing or new data being added to a representation. This means
+   a hypermedia API has some room to change without breaking the scripts that depend
+   on it. But a script is a playback of a human being’s thought process. If it encounters a
+   situation the human didn’t originally consider, the script won’t be able to fill in the blanks.
+
 ## 6. The collection pattern
+* Collection+JSON is one of several standards designed not to represent one specific
+  problem domain (the way Maze+XML does), but to fit a pattern—the collection—that
+  shows up over and over again, in all sorts of domains. This standard makes a good
+  example, because it’s a formalized version of the JSON-based APIs that first-time de‐
+  signers tend to come up with. Collection+JSON lets you follow your natural design
+  inclinations without running afoul of the Fielding constraints.
+* If there’s no domain-specific standard for your problem domain (and there probably
+  isn’t), you may be able to use a collection-based standard instead. Instead of starting
+  from nothing, you’ll be able to focus on adapting your application semantics to the
+  collection pattern. Not only will you save time, you’ll get access to a preexisting base of
+  client programs and server-side tools.
+* A collection resource is a little more specific than that. It exists mainly to group other
+  resources together. Its representation focuses on links to other resources, though it may
+  also include snippets from the representations of those other resources. (Or even the
+  full representations!)
+* (See book notes for a nice description of Collection+JSON)
+* There are a number of generic link relations for navigating paginated lists. These include
+  "next", "previous", "first", "last", and "prev" (which is a synonym for “previous”).
+  These link relations were originally defined for HTML, but now they’re registered with
+  the IANA, so you can use them with any media type
+* Google, the biggest corporate adopter of AtomPub, uses Atom
+  documents to represent videos, calendar events, cells in a spreadsheet, places on a map,
+  and more.
+* But the AtomPub story also shows that “nothing wrong with the standard” isn’t good
+  enough. People won’t go through the trouble of learning a standard unless it’s directly
+  relevant to their needs. It’s easier to reinvent the “collection” pattern using a fiat standard
+  based on JSON, so that’s what thousands of developers did—and continue to do
+* But an "item" still isn’t anything in particular. It’s almost as vague a term as “resource.”
+  In a microblogging API, an "item" will be a bit of text with a timestamp. In a payment
+  processor, an "item" will include a creditor, a debitor, a method of payment, and an
+  amount of money. There’s still an enormous gap between the application semantics of
+  the collection pattern and the application semantics of your individual API.
+
 ## 7. Pure hypermedia designs
+* Nothing says you have to use the collection pattern, but it is the most popular design
+  pattern for APIs. If you want to implement some other pattern, or if your API design
+  doesn’t fit any particular pattern, you can describe an API’s semantics using pure hy‐
+  permedia. You don’t have to create an entirely new standard like Maze+XML, with its
+  own media type. You can represent the state of your resources using a generic hypermedia language.
+* HTML has distinct advantages even for an API designed to be consumed entirely by
+  machines. HTML imposes more structure on a document than XML or JSON does, but
+  not so much structure as to solve only one specific problem, the way Maze+XML does.
+  HTML sits somewhere in the middle, like Collection+JSON.
+* More important, HTML has built-in hypermedia controls. I mentioned these controls
+  back in Chapter 4, but just to recap, here are the most important ones:
+* * The /< link /> tag and /< a /> tag are simple outbound links, like the /< link /> tag in Maze
+  +XML. They tell the client to make a GET request to a specific URL in order to get
+  a representation. That representation becomes the current view.
+* * The /< img /> tag and /< script /> tags are embedding links. They tell the client to au‐
+  tomatically make a GET request to another resource, and to embed the represen‐
+  tation of that resource in the current view.
+* * When the /< form /> tag has the string "GET" as its method attribute (i.e. /< form meth
+  od="GET">), it acts as a templated outbound link. This works like a URI Template,
+  or the queries slot in Collection+JSON. The server provides the client with a base
+  URL and some input fields (HTML /< input /> tags). The client plugs in values for
+  those fields, combines them with the base URL to form a one-of-a-kind destination
+  URL, and makes a GET request to that URL.
+* * When the /<form/> tag has "POST" as its method attribute, it describes an HTTP POST
+  request that can do anything at all. The /< input /> tags are still present, but instead
+  of being used to create the request URL, they’re used to create an entity-body with
+  the media type application/x-www-form-urlencoded. The request URL is hard‐
+  coded in the action attribute of the <form> tag
+* hCard is a microformat: a lightweight industry standard defined through informal collaboration on a
+  wiki, rather than through the formal IETF process that results in RFCs.
+* Microdata is a refinement of the microformat concept for HTML 5. You see, microfor‐
+  mats are kind of a hack. HTML’s class attribute was designed to convey information
+  about visual display (via CSS), not to convey bits of application semantics
+* The main source of microdata items is schema.org, a project of four big search engines
+  (Bing, Google, Yahoo!, and Yandex) to define application semantics for different prob‐
+  lem domains. Search engines have an interest in understanding the high-level applica‐
+  tion semantics of a web page—that is, whatever real-world thing the web page is talking
+  about.
+* you’ll start seeing examples that refer to schema.org microdata items. To a
+  human being, it should be pretty obvious what they mean. The URL http://schema.org/Person
+  points to the schema.org microdata item corresponding to our everyday notion
+  of a “person.”
+* What exactly should the HTML documents look like? I didn’t define this because I
+  don’t care. Your hMaze implementation can serve full human-readable documents
+  with lots of flavor text, or it can serve very compact documents optimized for au‐
+  tomated clients. As long as you use the hMaze CSS classes and link relations cor‐
+  rectly, your choice will have no effect on the application semantics of the maze.
+* If you find yourself writing up (or generating) documentation like this example, you’re
+  using human-readable documentation as a substitute for hypermedia. That’s unacceptable.
+  You’re creating useless work for yourself and your users.
+*  I don’t have to provide a template for constructing the action URL, or force the client
+   to reckon with my internal concept of a “switch ID,” because the <form> tag for flipping
+   a switch includes the actual URL the client should use. I don’t have to make caveats like
+   “You can only flip a switch if you’re in the same cell as the switch,” because hypermedia
+   controls are presented only when they can be used. If the submit button isn’t there, the
+   state transition isn’t available
+* I used to think that you should design APIs by identifying the resources and tying them
+  together with hypermedia. This resource-oriented approach is good advice when you’re
+  trying to move away from publishing all your internal methods as a huge list of API
+  calls. Thinking in terms of resources will at least group the API calls together in sensible ways.
+* But in a hypermedia-based design, resources don’t matter as much. The designer’s job
+  is to identify all the state transitions. A resource-oriented design would focus heavily
+  on the mysterious switch as a resource, as a thing in itself. But the switch itself isn’t all
+  that important. My design focuses on the state transition, on what you can do with the
+  switch.
+* HTML includes a lot of hypermedia controls, but the controls can’t describe all of
+  HTTP’s protocol semantics. There’s no way to tell an HTML client to make a PUT
+  or DELETE request without using JavaScript.
+* This is why I think HAL strips too much away from HTML. How are you supposed to
+  know which of the infinite possibilities are present in a given link? The <link> tag with
+  rel="east" should trigger a GET request that gives you a representation of the cell to
+  the east. The /< link /> tag with rel="flip" should trigger a POST request that flips the
+  switch. One of them is a safe operation that modifies application state; the other is an
+  unsafe, non-idempotent operation that modifies resource state. In HAL, those two links
+  look almost identical. The only real difference is the link relation.
+* Siren - I’ll close out this chapter by taking a brief look at another general hypermedia format: Siren.
+  Siren is a newer format than HAL, and although it’s based on JSON, it takes a
+  more HTML-like approach to hypermedia than HAL’s minimalism.
+* Siren is designed to represent abstract groupings of data it calls entities. A Siren “entity”
+  is conceptually similar to HTML’s < di v> tag. It’s a convenient way of splitting up your
+  data. An entity may be an HTTP resource with its own URL, but it doesn’t have to be.
+* The Semantic Challenge: How Are We Doing?
+* * We have a client-server Internet protocol, HTTP, which assigns very general meanings to different kinds of
+requests: GET, POST, PUT, and so on.
+* * We have the idea of hypermedia, which allows the server to tell the client which HTTP
+requests it might want to make next. This frees the client from having to know the shape
+of the API ahead of time. 
+* * And we have a whole lot of standards for building APIs
+
 ## 8. Profiles
 ## 9. The design procedure
 ## 10. The Hypermedia zoo
