@@ -2497,7 +2497,7 @@ Chapter 8 - Profiles
         human consumption.
 
 !!!!!   If you’re designing an API, and you know that all the decisions about state transitions
-        will be made by human endusers, you don’t need a profile at all. Websites don’t have
+        will be made by human end users, you don’t need a profile at all. Websites don’t have
         profiles. If you know that all the decisions will be made by automated clients, you don’t
         need embedded documentation at all.
 
@@ -3082,7 +3082,7 @@ Chapter 9 - The Design Procedure !!!!!!!!!!!!!!
                     recommended that you define your application semantics in a machine-readable profile,
                     and you can declare a new version of a profile.
 
-            API versioning gets a lot of attention because the problem is a lot worse for an API that
+!!!         API versioning gets a lot of attention because the problem is a lot worse for an API that
             ignores the hypermedia constraint. But it’s just one example of the general problem
             addressed by hypermedia. How does the client know which resource has the represen‐
             tation it wants? Once the client gets a representation, how is it supposed to know what

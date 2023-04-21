@@ -427,7 +427,283 @@ of the API ahead of time.
 * * And we have a whole lot of standards for building APIs
 
 ## 8. Profiles
+* Over the past three chapters, I’ve built up a set of rules for designing a brand new API.
+  There’s still some work to do on these rules, but I can now present them in something
+  approaching their complete form:
+* * Is there a domain-specific standard for your problem? If so, use it. Document any
+  application-specific extensions (Chapter 5).
+* * Does your problem fit the collection pattern? If so, adopt one of the collection
+  standards. Define an application-specific vocabulary and document it (Chapter 6).
+* * If neither of those is true, choose a general hypermedia format. Break down your
+  application into its state transitions. Document those state transitions (Chapter 7).
+* * At this point, you have your protocol semantics nailed down. The application se‐
+  mantics are all that remain. Are there existing microdata items or microformats
+  that cover your problem domain? If so, use them. Otherwise, define an application specific vocabulary and
+  document it (Chapter 7).
+*  HTTP’s Content-Type header is the clearest example of this. The value of this header
+   tells you how to parse the entity-body. Some examples:
+* * Content-Type: text/html
+* * Content-Type: application/json
+* * Content-Type: application/atom+xml
+* * Content-Type: application/vnd.collection+json
+* * Content-Type: application/vnd.amundsen.maze+xml
+* If the media type is one that defines hypermedia controls (like an HTML document),
+  then parsing a response document lets you know what HTTP requests you can make
+  next. You now understand the document’s protocol semantics.
+* If the media type is a domain-specific format (like Maze+XML), then parsing the document also gives you
+  an understanding of a state in the problem space (like a maze cell). You now understand
+  the document’s application semantics.
+  Once you understand both the protocol semantics and the application semantics, you’re done. You (or your
+  software) can make a decision based on the available information.
+* These “missing” specifications aren’t really missing. For hCard, the specification is at
+  http://microformats.org/wiki/hcard. For Twitter, the specification is at https://dev.twit
+  ter.com/docs. I’m going to call these “missing” specifications profiles. Documents like
+  these are the main topic of this chapter.
+* What is a profile? A profile is defined to not alter the semantics of the resource representation itself, but to
+  allow clients to learn about additional semantics… associated with the resource repre‐
+  sentation, in addition to those defined by the media type…
+* This is why I recommend you choose a full-featured hypermedia format like HTML or
+  Siren as your representation format. You’ll still have to write a profile, but the profile
+  needn’t contain a lot of detail about your API’s protocol semantics. That stuff will be
+  embedded in the representations themselves.
+*  As the API designer, you are responsible for documenting all of your
+   link relations ahead of time, in a profile document or in the defini‐
+   tion of a custom media type. The only exceptions are link relations that
+   you took from the IANA registry (see Chapter 10). You are not ex‐
+   cused from this if you think your link relations are self-explanatory,
+   because they never are.
+* HTML is really, really popular. It’s the dominant representation format on the
+  human web. But it’s not the dominant format for web APIs. That honor belongs to JSON,
+  with XML a runner-up. HTML is a very distant third or fourth.
+*  Any JSON object that defines the property @context can be a JSON-LD context. This
+   particular context explains the application semantics of a JSON representation, in terms
+   of human-readable API documentation.
+* If you’re designing an API, and you know that all the decisions about state transitions
+  will be made by human end users, you don’t need a profile at all. Websites don’t have
+  profiles. If you know that all the decisions will be made by automated clients, you don’t
+  need embedded documentation at all.
+* In Summary
+  We can solve the semantic challenge with a combination of a well-chosen media
+  type and a profile that fills in the gaps. Here’s the essential information necessary to
+  solve it:
+* * A link relation is a string describing the state transition that will happen if the client
+            triggers a hypermedia control. Example: Maze+XML’s east relation, which lets you
+            know that a certain link points to something geographically east of the current
+            resource. Traditionally, the state transition is a change in application state (triggered
+            with a GET request), but it can also be a change in resource state (triggered by PUT,
+            POST, DELETE, or PATCH).
+* * A semantic descriptor is a short string that indicates what some part of a represen‐
+            tation means. Example: hCard’s fn descriptor, which is used as a CSS class to mark
+            up a person’s name in HTML. Unlike “link relation,” this is a term I made up for
+            this book.
+* * Although link relations and semantic descriptors are meaningless on their own,
+            there’s always some document nearby that contains a human-readable explanation.
+            We call this document a profile
+* *  Profiles have traditionally taken the form of tedious “API documentation.” But if
+            you chose a good hypermedia format for your representations, your profile will just
+            be a list of link relations and semantic descriptors, with a prose explanation for
+            each. This optimization lets you create a machine-readable profile using XMDP,
+            ALPS, or JSON-LD.
+* * A machine-readable profile allows a client to automatically look up the humanreadable definition of a link
+            relation or semantic descriptor. Machine-readable
+            profiles can be searched and remixed. The ALPS Registry contains a lot of ALPS
+            profiles to work with.
+* * JSON-LD contexts can take the ad hoc JSON documents served by today’s APIs,
+            and describe their application and protocol semantics in a machine-readable way.
+            You can use JSON-LD to retrofit a JSON API with simple hypermedia controls,
+            without breaking the API’s existing clients.
+* *  ALPS profiles are representation agnostic. One ALPS profile can be applied to an
+            HTML document, a HAL document, a Collection+JSON document, an ad hoc
+            JSON or XML document, and many others.
+* *  Profiles are not a substitute for human-readable text embedded in hypermedia
+            representations. There are two different use cases here. Profiles allow developers to
+            write smart clients. Text embedded in a representation allows a human being to use
+            an application through a client that faithfully renders representations.
+
 ## 9. The design procedure
+* You need to design an API: what should it look like? In
+  this chapter, I’ll lay out a procedure that begins with business requirements and ends
+  with some software and some human-readable documentation.
+* Two-Step Design Procedure.. In its simplest form, the procedure has two steps:
+* * 1-Choose a media type to use in your representations. This puts constraints on your
+    protocol semantics (the behavior of your API under the HTTP protocol) and your
+    application semantics (the real-world things your representations can refer to).
+* * 2-Write a profile that covers everything else.
+* This won’t necessarily give you a good API. In fact, this version of the procedure de‐
+  scribes every API ever designed. If you wanted a really generic design that’s hard to
+  learn, you’d blaze through step 1 by choosing application/json as your representation
+  format. Since JSON puts no constraints on your protocol or application semantics, you’d
+  spend most of your time in step 2, defining a fiat standard and describing it with human readable API documentation.
+  That’s what most APIs do today, and that’s what I’m trying to stop. A big chunk of the
+  work that goes into creating a fiat standard is unnecessary, and client code based on a
+  fiat standard can’t be reused. But doing anything else requires some preparatory thought
+  and a willingness to reuse other people’s work when possible.
+* Seven-Step Design Procedure:
+* * List all the pieces of information a client might want to get out of your API or put
+       into your API. These will become your semantic descriptors.
+       Semantic descriptors tend to form hierarchies. A descriptor that refers to a real world object like a person will
+       usually contain a number of more detailed, more abstract descriptors like givenName. Group your descriptors
+       together in ways that make intuitive sense.
+* * Draw a state diagram for your API. Each box on the diagram represents one kind
+     of representation—a document that groups together some of your semantic de‐
+     scriptors. Use arrows to connect representations in ways you think your clients will
+     find natural. The arrows are your state transitions, triggered by HTTP requests.
+     You don’t need to assign specific HTTP methods to your state transitions yet, but
+     you should keep track of whether each state transition is safe, unsafe but idempo‐
+     tent, or unsafe and nonidempotent.
+     At this point, you may discover that something you put down as a semantic de‐
+     scriptor (the customer of a business) makes more sense as a link relation (a busi
+     ness links to a person or another business using the link relation customer). Iterate
+     steps 1 and 2 until you’re satisfied with your semantic descriptors and link relations
+     Now you understand your API’s protocol semantics (which HTTP requests a client will
+       be making) and its application semantics (which bits of data will be sent back and forth).
+       You’ve come up with a list of magic strings (semantic descriptors and link relations)
+       that make your API unique, and you know roughly how those magic strings will be
+       incorporated into HTTP requests and responses. You can then move on to the following steps:
+* * Try to reconcile your magic strings with strings from existing profiles. I list some
+     places to look in “The Semantic Zoo” on page 230. Think about IANA-registered link
+     relations, semantic descriptors from schema.org or alps.io, names from domain specific media types, and so on.
+     This may change your protocol semantics! In particular, unsafe link relations may
+     switch back and forth between being idempotent and not being idempotent.
+     Iterate steps 1 through 3 until you’re satisfied with your names and with the layout
+     of your state diagram.
+* * You’re now ready to choose a media type (or define a new one). The media type
+     must be compatible with your protocol semantics and your application semantics.
+     If you’re lucky, you may find a domain-specific media type that already covers some
+     of your application semantics. If you define your own media type, you can make it
+     do exactly what you need.
+     If you choose a domain-specific media type, you may need to go back to step 3, and
+     reconcile your names for semantic descriptors and link relations with the names
+     defined by that media type.
+* *  Write a profile that documents your application semantics. The profile should ex‐
+     plain all of your magic strings, other than IANA-registered link relations and strings
+     explained by the media type.
+     I recommend you write the profile as an ALPS document, but a JSON-LD context
+     or a normal web page will also work. The more semantics you borrowed from other
+     people in step 4, the less work you’ll have to do here.
+     If you defined your own media type, you may be able to skip this step, depending
+     on how much of this information you put in the media type specification
+* *  Now it’s time to write some code. Develop an HTTP server that implements the
+     state diagram from step 3. A client that sends a certain HTTP request should trigger
+     the appropriate state transition and get a certain representation in response.
+     Each representation will use the media type you chose in step 4, and link to the
+     profile you defined in step 5. Its data payload will convey values for the semantic
+     descriptors you defined in step 1. It will include hypermedia controls to show the
+     client how to trigger the further state transitions you defined in state 2.
+* * Publish your billboard URL. If you’ve done the first five steps correctly, this is the
+     only information your users will need to know to get started with your API. You
+     can write alternate human-readable profiles (API documentation), tutorials, and
+     example clients to help your users get started, but that’s not part of the design.
+* (following this the book goes deeper into each of these points..)
+* If an API is described only in prose, then changing the prose means rewriting all the clients. That’s
+  a big problem with current APIs, and it’s a problem I’m trying to mitigate with this book
+* Example: You Type It, We Post It
+  (very nice example in which the author goes through all the steps described in this chapter)
+*  Some Design Advice
+   Hopefully by this point you have a good idea of how I go through my design process.
+   Now I’d like to bring up some practical lessons I’ve learned from developing and ap‐
+   plying this process:
+* *  Resources Are Implementation Details - 
+     Most procedures for designing RESTful web APIs focus on resource design. But there
+     are no resources here. The boxes in the state diagrams aren’t resources, they’re repre‐
+     sentations of resources—the actual documents sent back and forth between client and
+     server.
+* *  Don’t Fall into the Collection Trap - 
+     Don’t use your database schema as the basis for your API design.
+     Draw a state diagram instead. Why ? When you publish an API based on a database schema, changes to the schema
+  become basically impossible. You’ve given a software dependency on your database
+  schema to thousands of people you’ve never heard of. These people are your clients and
+  supporting them is your responsibility. Changes to the schema, changes that your web‐
+  site users won’t even notice, will cause big problems for your API users.
+* * Don’t Start with the Representation Format
+    It’s fine to use a general format like HTML for doodling, but I recommend you hold off on
+    a decision until you’ve gotten, however tentatively, to step 4. That’s because represen‐
+    tation formats aren’t just passive containers for data. They introduce assumptions about
+    protocol and application semantics into every API that uses them. These assumptions
+    may conflict with your business requirements.
+* * URL Design Doesn’t Matter
+    Some API design guides, including the original RESTful Web Services, spend a lot of
+    time talking about the URLs you should assign to your resources. Each URL you serve
+    should clearly identify the resource in such a way that a human being looking at the
+    URL can figure out what’s on the other end. Again, there’s nothing wrong with nice-looking URLs. Nice-looking URLs are great!
+    But they’re cosmetic. They look nice. They don’t do anything. Your API clients should
+    continue to work even if all of the nice-looking URLs were suddenly replaced with
+    randomly generated URLs
+* * Standard Names Are Probably Better Than Your Names
+    Let’s say that your application semantics include “a person’s first name.” You’d write that
+    down in step 1, you’d try to fit it into a hierarchy, and you’d give it a temporary name
+    based on the corresponding field in your database schema or your data model. Some‐
+    thing like first_name, firstname, first-name, fn, first name, first, fname, or giv
+    en_name. That’s fine for step 1. But when you get to step 3 you need to look around,
+    notice that there are lots of existing profiles for describing peoples’ first names, and
+    adopt one of them .You may be attached to the names you chose in step 1. But you’re not doing this API
+    for yourself. You’re doing this for your users.
+    Over their careers, users will consume lots of different APIs, and they’ll benefit from not having
+    to learn 20 slightly different names for the same thing.
+* *  When Your API Changes
+     One of today’s most hotly debated topics in the API community is versioning. It’s an
+     enormous problem. Most companies that put out an API never change that API after
+     its initial release. They can’t do it. To be blunt, they can’t do it because they ignored the hypermedia constraint. Most APIs
+     put their protocol and application semantics into human-readable documentation. The
+     users of those APIs then write a bunch of client software based on that documentation.
+     Now the API providers are stuck. They can change the documentation, but doing so
+     won’t automatically change the behavior of all those clients. They’ve given their users
+     veto power over any change in their design.
+     If you change a resource and your clients can’t automatically adapt to the change, you’ll
+     need to spend some period of time effectively publishing two different resources—the
+     old one and the new one—with different application or protocol semantics. There are
+     three common strategies for doing this.
+* * * Partitioning the URL space
+      In the most common versioning technique, the entire API is split into two disjoint APIs.
+      Sometimes the two APIs have different billboard URLs, like http://api-v1.example.com/ and http://api-v2.example.com/.
+* * * Versioning the media type
+      If you defined a domain-specific media type for your application, you can give it a
+      version parameter. Clients can then use content negotiation (see Chapter 10) to ask for
+      one version or the other:
+      Accept: application/vnd.myapi.document?version=2
+      I don’t think you should define a domain-specific media type in the first place, but even
+      if you do, this is a bad idea. Your media type is not your API. Here’s a thought experiment:
+      could another company use your media type in their own, unrelated API?
+* * * Versioning the profile
+      I recommended that you base your API around a standardized media type, and obvi‐
+      ously you can’t go in and declare a new version of someone else’s media type. But I also
+      recommended that you define your application semantics in a machine-readable profile,
+      and you can declare a new version of a profile.
+* (more ideas about API versioning follow this in the book)
+*  Adding Hypermedia to an Existing API
+   You should be able to get your API up to the level of quality I advocate in this book,
+   without breaking your existing clients. Here’s a modified version of the seven-step pro‐
+   cess I laid out earlier, for fixing up a JSON-based API:
+* * Document all your existing representations. Each one will contain a number of
+     semantic descriptors. You can’t change these, but you should be able to add new
+     ones.
+* * Draw a state diagram for your API. The boxes on the diagram are your existing
+    representations. You probably won’t have any state transitions, because most exist‐
+    ing APIs don’t have any hypermedia links. Now’s the time to add some. Use arrows
+    to connect representations in ways that make sense. The names of the arrows are
+    your link relations. At this point it may turn out that some of your semantic descriptors are actually
+    link relations:
+    { "homepage": "http://example.com" }
+    You can convert them to link relations at this point, but be sure not to rename them
+    when you get to the next step.
+* * You can’t change the name of anything you wrote down in step 1, because that would
+    break your existing clients. But you can go through the link relations you created
+    in step 2, and make sure their names come from the IANA and other well-known
+    sources whenever possible.
+* * You can’t change your media type, because that would break your clients. It’ll have
+     to stay application/json (or whatever it is now).
+* * Since you can’t change the media type, all your application semantics and protocol
+    semantics must be defined somewhere else. You’ve got two choices: an ALPS profile
+    or a JSON-LD context.
+    If you wrote down any unsafe link relations in step 2, your best choice is JSON-LD
+    with Hydra (see Chapter 12). You should be able to take your human-readable
+    descriptions of API calls and convert them into machine-readable Hydra operations.
+* * You’ve already got most of the code written. You’ll just need to extend each repre‐
+   sentation by serving appropriate links.
+* * Your billboard URL will be the same as before. If you didn’t have one before, because
+    your API was a group of discrete API calls, you can create a new resource to act as
+    your home page, and know that only hypermedia-aware clients will access it.
+
 ## 10. The Hypermedia zoo
 ## 11. HTTP for APIs
 ## 11. Resource description and linked data
