@@ -705,6 +705,145 @@ of the API ahead of time.
     your home page, and know that only hypermedia-aware clients will access it.
 
 ## 10. The Hypermedia zoo
+* The original hypermedia format, and a highly underrated choice for an API. HTML can
+  make direct use of microformats and microdata, instead of using an approximation such
+  as an ALPS profile. HTML’s /</script/> tag lets you embed executable code to be run on
+  the client, a feature of RESTful architectures (“code on demand”; see Appendix C) not
+  supported by any other hypermedia format. And HTML documents can be graphically
+  displayed to human beings—invaluable for APIs designed to be consumed by an Ajax
+  or mobile client, and useful when debugging any kind of API.
+*  The Semantic Zoo
+* *  The IANA Registry of Link Relations
+     I’ve talked about the IANA registry of link relations for practically the entire book. It’s
+     a global registry containing about 60 link relations. You’re allowed to use any IANAregistered relation in
+     any representation, and to assume that your clients know what you’re talking about.
+* *  The Microformats Wiki
+     The Microformats project was the first successful attempt at defining profiles for ap‐
+     plication semantics. Microformats are defined collaboratively, on a wiki and mailing
+     list. Of the stable microformats, these are the ones you’re most likely to be interested in:
+* * * hCalendar
+* * *  hCard
+* * * XFN - A set of link relations describing relationships between people, ranging from friend to colleague to sweetheart.
+* * * geo
+* * * hAtom
+* * * hMedia - Basic metadata about image, video, and audio files
+* * *  hProduct - Product listings.
+* * * hResume - Resumes/CVs.
+* * * hReview - Describes a review (of anything), with a rating
+* * schema.org
+    There are hundreds of microdata items described on schema.org, and more are on the
+    way as the schema.org maintainers work with the creators of other standards to repre‐
+    sent those standards in microdata.
 ## 11. HTTP for APIs
+* Think of the World Wide Web (and of any other RESTful API) as a technology stack.
+  URLs are on the bottom; they identify resources. The HTTP protocol sits on top of those
+  resources, providing read access to their representations and write access to the under‐
+  lying resource state. Hypermedia sits on top of HTTP, describing the protocol semantics
+  of one particular website or API.
+* The bottom layer answers the question “Where is the resource?” The middle layer an‐
+  swers the question “How do I communicate with the resource?” The top layer answers
+  the question “What next?”
+* If a client sends some bad data to your API, you should send the response code 400 (Bad
+  Request) and an entity-body explaining what the problem is. Don’t send 200 (OK) with
+  an error message. You’re lying to the client. You’ll have to write extra documentation
+  explaining that in your API, OK sometimes doesn’t mean “OK.”
+* When I make an HTTP request from my web browser, it sends a much more complicated
+  Accept header:
+  Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+  RFC 2616 gives the complex details of what can go into an Accept-* header, but this
+  real-life example serves as a good indicator of what’s possible. The main job of a web
+  browser is to display web pages, so my browser gives top priority to HTML represen‐
+  tations (the text/html media type) and XHTML representations (application/
+  xhtml). My browser can also display raw XML (application/xml), but since that doesn’t
+  look as nice, XML is given a lower priority than HTML (q=0.9). If neither HTML nor
+  XML representations are available (maybe because the resource is a binary image), my
+  browser will accept any media type at all (*/*). But that’s a last-ditch option, and it’s
+  given the lowest priority of all (q=0.8).
+* If the server can’t fulfill a request due to Accept-* restrictions, it can send the response
+  code 406 (Not Acceptable).
+* you can give each representation its own URL, effectively making it an
+  independent resource.
+* HTTP Performance - HTTP clients are allowed to make whatever HTTP requests they want, whenever they
+  want. But some requests turn out to be pointless wastes of time. HTTP defines several
+  optimizations for discouraging requests that are likely to be pointless (caching), for
+  reducing the cost of a request that turns out to be pointless (conditional requests), and
+  for reducing the cost of a request in general (compression).
+* Caching - I’m going to focus on the simplest way to add caching to web APIs,
+  using the HTTP header Cache-Control.
+* * The max-age directive says how long the client should wait before making this HTTP
+    request again. If a client gets this response and half an hour later, it wants to send the
+    request again, it should hold off. The server said to check back in an hour (3,600 sec‐
+    onds), and not before
+    A caching directive applies to the entire HTTP response, including the headers and the
+    response code, not just to the entity-body. The idea is that if the client really needs to
+    look at an HTTP response, it should look at the cached response instead of making the
+    request again
+* * Another common use of Cache-Control is for the server to tell the client not to cache
+    a response, even if it would otherwise:
+    HTTP/1.1 200 OK
+    Content-Type: text/html
+    Cache-Control: no-cache
+    ...
+    This indicates that the resource state is so volatile that the representation probably be‐
+    come obsolete during the time it took to send it
+* * For representations that consist entirely of hypermedia controls, representations that
+only change when you upgrade your API implementation, it makes sense to set maxage pretty high.
+* *  Conditional GET - Sometimes you just don’t know when a resource’s state will change. (Collection-type
+     resources are the worst for this.) It might change all the time, or it might change so rarely
+     that you can’t estimate how often a change happens.
+     This client-side feature is called a conditional request, and to support it, you’ll need to
+     serve the Last-Modified or ETag header with your representations (better yet, serve
+     both). The Last-Modified header tells the client when the state of this resource last
+     changed.
+* * * The client makes a note of the Last-Modified value, and the next time it makes a request,
+      it puts that value in the HTTP header If-Modified-Since:
+      GET /some-resource HTTP/1.1
+      If-Modified-Since: Mon, 21 Jan 2013 09:35:19 GMT
+      If the resource state has changed since the date given in If-Modified-Since, then
+      nothing special happens. The server sends the status code 200, an updated LastModified, and a full representation
+* * * But if the representation hasn’t changed since the last request, the server sends the status
+      code 304 (Not Modified), and no entity-body
+* * * This saves both parties time and bandwidth. The server doesn’t have to send the rep‐
+      resentation and the client doesn’t have to receive it. If the representation was one that
+      gets dynamically generated from the resource state, a conditional request also saves the
+      server the effort of generating the representation
+* * * Of course, this means some extra work for you. You’ll need to track the last-modified
+      date of all your resources. And remember that the value for Last-Modified is the date
+      the representation changed. If you have a collection resource whose representation in‐
+      cludes bits of other representations, that resource’s Last-Modified represents the last
+      time any of that stuff changed
+* * * There’s another strategy that is easier to implement than Last-Modified, and that avoids
+      some race conditions. The ETag header (it stands for “entity tag”) contains a nonsensical
+      string that must change whenever the corresponding representation changes.
+      Here’s an example HTTP response that includes ETag
+* * * When the client makes a second request for the same resource, it sets the If-NoneMatch header to the ETag it got
+      in the original response.  If the ETag in If-None-Match is the same as the representation’s current ETag, the server
+      sends 304 (Not Modified) and an empty entity-body. If the representation has changed,
+      the server sends 200 (OK), a full entity-body, and an updated ETag.
+* * Compression - Textual representations like JSON and XML documents can be compressed to a fraction
+    of their original size. An HTTP client library can request a compressed version of a
+    representation and then transparently decompress it for its user.
+* * * The client decompresses the data using the algorithm given in Content-Encoding, and
+      then treats it as the media type given as Content-Type. In this case, the client would use
+      the gzip algorithm to decompress the binary data back into an HTML document. As
+      far as the client is concerned, it asked for HTML and it got HTML. This technique can
+      save a lot of bandwidth, with very little cost in additional complexity.
+* Authentication - For simplicity’s sake, the examples I’ve presented throughout this book don’t require
+  any kind of authentication. You make an HTTP request, and you get a response. There
+  are plenty of real APIs like this, but most APIs require authentication.
+* * There are two steps to authentication. 
+* * * Step 1 is a one-time step in which a user sets up
+    her credentials with the service provider. Usually this means a human being using her
+    web browser to create an account on the API server, or tying in some existing user
+    account on a website with the API server.
+* * * Step 2 is the automated presentation of the user credentials along with each request to
+     the API. Why present the user credentials along with every HTTP request? Because of the state‐
+     lessness constraint, which allows the server to completely forget about a client between
+     requests. There are no sessions in a RESTful server implementation.
+* * As an API provider, you don’t have to implement all four of these application flows. If
+    you’re writing an API to serve as a backend for a mobile application, you can just im‐
+    plement the “resource owner password credentials” flow. But if you want third parties
+    to integrate clients with your API, you’ll need to implement the application flows your
+    clients want to use.
 ## 11. Resource description and linked data
 ## 12. CoAP: REST for embedded systems
