@@ -4094,7 +4094,7 @@ Chapter  12 - Resource Description and Linked Data
             }
 
     JSON-LD as a Representation Format
-        So far, I’ve presented JSON-LD as a sort of profile format: an add-on to a plain JSON
+!!!     So far, I’ve presented JSON-LD as a sort of profile format: an add-on to a plain JSON
         document that explains its application semantics. You use the Link header to connect
         the JSON document to its JSON-LD context:
             Link: <http://api.example.com/profile.person.jsonld>; rel="http://www.w3.org/ns/json-ld#context"
@@ -4231,7 +4231,7 @@ The status codex
     499 (Client Closed Request).
 
 !!!!Remember, detailed error reporting is not an excuse for serving 200 (OK) when some‐
-    thing’s not OK. The meaning of your representation must always be consistentwith your
+    thing’s not OK. The meaning of your representation must always be consistent with your
     HTTP status code
 
 !!!!!!!
@@ -4825,8 +4825,6 @@ The header codex
 
 An API Designer’s Guide to the Fielding Dissertation
 (this is nice to have...you can return to this when you actually need to know more on the subject)
-
-TODO Add a readme with the most important notes from each chapter..
 
 TODO Create app that exposes application/vnd.collection+json as explained in the app/standard
 

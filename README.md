@@ -1,3 +1,21 @@
+# Introduction
+# 1. Surfing the web
+# 2. A Simple API
+# 3. Resources and representations
+# 4. Hypermedia
+# 5. Domain specific designs
+# 6. The collection pattern
+# 7. Pure hypermedia designs
+# 8. Profiles
+# 9. The design procedure
+# 10. The Hypermedia zoo
+# 11. HTTP for APIs
+# 12. Resource description and linked data
+# 13. CoAP: REST for embedded systems
+# The status codex
+# The header codex
+
+
 ## Introduction
 * Of course, Twitter, Facebook, and Google are big companies that compete with each
   other. They don’t want to make it easy for you to learn their competitors’ APIs. But small
@@ -845,5 +863,107 @@ only change when you upgrade your API implementation, it makes sense to set maxa
     plement the “resource owner password credentials” flow. But if you want third parties
     to integrate clients with your API, you’ll need to implement the application flows your
     clients want to use.
-## 11. Resource description and linked data
-## 12. CoAP: REST for embedded systems
+## 12. Resource description and linked data
+* The Linked Data Movement.. Web philosophy closer to the REST philosophy. Here are
+  Berners-Lee’s four principles of Linked Data:
+* * Use URIs as names for things.
+    In REST terms, this says that a URI identifies a resource. In Chapter 1, I called this the
+    principle of addressability.
+* * Use HTTP URIs so that people can look up those names.
+    This has two parts. First, you shouldn’t identify your resources with URIs like urn:isbn:
+    9781449358063. You should use URLs like http://example.com/books/9781449358063.
+    It’s true that urn:isbn:9781449358063 is a much more general way to refer to the resource,
+    but because it’s so general, a client can’t do anything with the reference.
+    Second, resources should have representations. A client that sends a GET request to a
+    URL should get some useful data in return. A URL like http://vocab.org/vnd/
+    mamund.com/2013/numbers/primes looks good, right up to the point when you send a
+    GET request to it and get a 404 error. Then you find out that the URL was actually a
+    URI. It has no representation. There may be a magical document somewhere that de‐
+    scribes that URI, but good luck finding it.
+* * When someone looks up a URI, provide useful information, using the standards (RDF*, SPARQL).
+    Again, resources have representations. A client that sends a GET request to a resource’s
+    URL should receive a document capturing the current state of the resource.
+    The exact standards don’t matter (I’m not even covering SPARQL in this book). What
+    matters is that you use some standard, instead of making up a custom data format. That
+    way, a client that understands your standard automatically knows how to handle the
+    data you provide—at least on a basic level. This is a theme I’ve been hitting throughout
+    this book: you should use an existing hypermedia format instead of defining your own.
+* * Include links to other URIs. so that they can discover more things.
+    And finally, the big payoff: the hypermedia constraint. A URI is now a URL, a link,
+    which a client can follow to get a representation. That representation will contain other
+    links, and the client can follow them to get closer to fulfilling whatever desire it was
+    programmed with.
+* If you want to write a Linked Data API, I suggest you use JSON-LD as your represen‐
+  tation format instead of RDF/XML or RDF/Turtle. JSON-LD is a new serialization of
+  RDF designed specifically for making APIs that resemble today’s other hypermedia
+  APIs.
+* So far, I’ve presented JSON-LD as a sort of profile format: an add-on to a plain JSON
+  document that explains its application semantics. You use the Link header to connect
+  the JSON document to its JSON-LD context:
+* But as representation formats go, JSON-LD isn’t very capable. Thanks to its RDF her‐
+  itage, JSON-LD can describe application semantics in great detail, but its protocol se‐
+  mantics are very limited. A Linked Data client can do nothing but follow links from one
+  bit of data to another. A client can’t change the data, because JSON-LD has no hyper‐
+  media controls for triggering unsafe HTTP requests.
+  If you want to use JSON-LD in your API, I recommend you also use an extension called
+  Hydra.
+* Hydra is a JSON-LD context that adds a lot of protocol semantics to JSON-LD. By itself,
+  JSON-LD only lets you specify links (using "@type": "@id"), to be triggered with GET
+  requests. Add Hydra to the mix, and you can specify almost any HTTP request.
+## 13. CoAP: REST for embedded systems
+* The Constrained Application Protocol is a protocol designed for use in low-power
+  embedded environments like home automation systems. CoAP is inspired by HTTP
+  and can be used to publish hypermedia-driven RESTful APIs, but it’s a very different
+  protocol from HTTP. CoAP brings a web-like architecture to a highly constrained en‐
+  vironment: an “Internet of Things” in which a lot of small, cheap computers commu‐
+  nicate over a low-capacity network
+* CoAP defines the four basic HTTP methods (GET, POST, PUT, and DELETE), though their 
+  semantics are slightly different than in HTTP.
+## The status codex
+* An HTTP status code is a three-digit number attached to an HTTP response. It’s a bit
+  of protocol semantics that lets the client know, on the most basic level, what happened
+  when the server tried to handle the request. The 41 HTTP response codes defined in
+  the HTTP specification form a set of basic protocol semantics that any API can use.
+* Remember, detailed error reporting is not an excuse for serving 200 (OK) when some‐
+  thing’s not OK. The meaning of your representation must always be consistent with your
+  HTTP status code
+* Families of Status Codes
+  The first digit of an HTTP status code is a very general indication of how the request
+  went. The HTTP specification defines five families of status codes using the initial digits
+  1 through 5. I’ll be covering each of these in a separate section:
+* * 1xx: Informational - These response codes are used only in negotiations between an HTTP client and server.
+* * 2xx: Successful - Whatever state transition the client asked for has happened.
+* * 3xx: Redirection - The state transition the client asked for has not happened. But if the client is willing
+            to make a slightly different HTTP request, that request should do what the client
+            is asking for.
+* * 4xx: Client Error - The state transition the client has asked for has not happened, due to a problem
+            with the HTTP request. The request was malformed, incoherent, self-contradictory,
+            or one that the server cannot accept.
+* * 5xx: Server Error - The state transition the client has asked for has not happened, due to a problem on
+            the server side. There’s probably nothing the client can do but wait for the problem
+            to be fixed
+* Four Status Codes: The Bare Minimum
+  I want to list just four that I consider the bare minimum for APIs. There’s one code from each family (apart
+  from 1xx, which you can more or less ignore):
+* * 200 (OK) - Everything’s fine. The document in the entity-body, if any, is a representation of
+  some resource.
+* * 301 (Moved Permanently) - Sent when the client triggers a state transition that moves a resource from one URL
+  to another. After the move, requests to the old URL will also result in a 301 status
+  code. You can use this status code to keep old URLs from breaking when your API changes
+    its URL structure.
+* * 400 (Bad Request) - There’s a problem on the client side. The document in the entity-body, if any, is an
+  error message. Hopefully the client can understand the error message and use it to
+  fix the problem.
+* * 500 (Internal Server Error) - There’s a problem on the server side. The document in the entity-body, if any, is an
+  error message. The error message probably won’t do much good, since the client
+  can’t fix a server problem
+* see a list of important HTTP status codes in the notes file from the repo
+
+## The header codex
+* HTTP headers are bits of metadata that describe the protocol semantics of an HTTP
+  request or response.
+* You probably shouldn’t create a new HTTP header at all.
+* Don’t let history repeat itself. An API should only use User-Agent to gather statistics
+  and to deny access to poorly programmed clients. It should not use User-Agent to tailor
+  its representations to specific clients
+* see a list of important HTTP headers in the notes file from the repo
